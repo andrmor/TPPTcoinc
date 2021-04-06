@@ -1,7 +1,7 @@
 #ifndef writer_h
 #define writer_h
 
-#include "DepositionNodeRecord.hh"
+#include "DataStructures.hh"
 
 #include <string>
 #include <vector>

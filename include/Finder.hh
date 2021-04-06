@@ -1,7 +1,7 @@
 #ifndef clusterer_h
 #define clusterer_h
 
-#include "DepositionNodeRecord.hh"
+#include "DataStructures.hh"
 
 #include <vector>
 

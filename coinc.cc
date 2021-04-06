@@ -1,4 +1,4 @@
-﻿#include "DepositionNodeRecord.hh"
+﻿#include "DataStructures.hh"
 #include "Reader.hh"
 #include "Finder.hh"
 #include "Writer.hh"
@@ -27,8 +27,8 @@ int main(int argc, char** argv)
 {
     // --- Start of user inits ---
 
-    std::string inputFileName  = "/home/andr/WORK/TPPT/TPPToutput-hits.txt";
-    std::string outputFileName = "/home/andr/WORK/TPPT/TPPToutput-coincidences.txt";
+    std::string inputFileName  = "/home/andr/WORK/TPPT/HitsOutput.txt";
+    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";
 
     double TimeWindow    = 4.0;
     double EnergyWinFrom = 0.461;

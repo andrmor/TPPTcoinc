@@ -1,7 +1,7 @@
 #ifndef reader_h
 #define reader_h
 
-#include "DepositionNodeRecord.hh"
+#include "DataStructures.hh"
 
 #include <string>
 #include <vector>
