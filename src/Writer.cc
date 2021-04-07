@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-Writer::Writer(const std::__cxx11::string &FileName)
+Writer::Writer(const std::string & FileName)
 {
     if (bDebug)
     {
