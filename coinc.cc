@@ -9,19 +9,16 @@
 
 // Input file format:
 //
-// # iScint x y z                   iScint is the scintillator's index and xyz is its center position
+// # iScint x y z               iScint is the scintillator's index and xyz is its center position
 // t1 e1
 // t2 e2
 // ...
-// tn en                            tn is the time of the n-th hit [ns], en is the n-th hit energy [MeV]
-// # ...                            next scintillator index
+// tn en                        tn is the time of the n-th hit [ns], en is the n-th hit energy [MeV]
+// # ...                        next scintillator index
 
 //Output file format
 //
-// Contains consecutive pairs of events (two lines per pair)
-// x1 y1 z1 T1                      first gamma:  xyz is the position of the scintullator's center, T is the event time
-// x2 y2 z2 T2                      second gamma
-// ...                              next pair of gammas
+// x1 y1 z1 x2 y2 z2 dt        xyz is the position of the scintullator's center, d2 is t2 - t1
 
 int main(int argc, char** argv)
 {
@@ -29,10 +26,11 @@ int main(int argc, char** argv)
 
     std::string inputFileName  = "/home/andr/WORK/TPPT/HitsOutput.txt";
     std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";
+    bool bBinaryOutput         = false;
 
-    double TimeWindow    = 4.0;
-    double EnergyWinFrom = 0.461;
-    double EnergyWinTo   = 0.561;
+    double TimeWindow    = 2.0;
+    double EnergyWinFrom = 0.511 * 0.95;
+    double EnergyWinTo   = 0.511 * 1.05;
 
     bool bDebug = true;
 
@@ -58,7 +56,7 @@ int main(int argc, char** argv)
     std::vector<CoincidencePair> Pairs;
     cf.findCoincidences(Pairs);
 
-    Writer writer(outputFileName);
+    Writer writer(outputFileName, bBinaryOutput);
     writer.bDebug = bDebug;
     error = writer.write(Pairs, ScintPositions);
     if (!error.empty())

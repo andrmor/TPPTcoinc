@@ -15,6 +15,7 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
     for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
     {
         const HitRecord & thisHit = Hits[iCurrentHit];
+        //out(iCurrentHit, "-->", thisHit.iScint, thisHit.Time);
 
         int iNextHit = iCurrentHit + 1;
         const HitRecord & nextHit = Hits[iNextHit];
