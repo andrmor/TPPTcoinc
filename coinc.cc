@@ -24,11 +24,12 @@ int main(int argc, char** argv)
 {
     // --- Start of user inits ---
 
-    std::string inputFileName  = "/home/andr/WORK/TPPT/HitsOutput.txt";
+    std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.txt";
+    bool bBinaryInput          = false;
     std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";
     bool bBinaryOutput         = false;
 
-    double TimeWindow    = 2.0;
+    double TimeWindow    = 1.12;
     double EnergyWinFrom = 0.511 * 0.95;
     double EnergyWinTo   = 0.511 * 1.05;
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv)
     std::vector<ScintPosition> ScintPositions;
     ScintPositions.resize(numScint);
 
-    Reader reader(inputFileName, EnergyWinFrom, EnergyWinTo);
+    Reader reader(inputFileName, bBinaryInput, EnergyWinFrom, EnergyWinTo);
     reader.bDebug = bDebug;
     std::string error = reader.read(Hits, ScintPositions);
     if (!error.empty())
