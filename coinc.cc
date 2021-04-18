@@ -24,10 +24,10 @@ int main(int argc, char** argv)
 {
     // --- Start of user inits ---
 
-    std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.txt";
-    bool bBinaryInput          = false;
-    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";
-    bool bBinaryOutput         = false;
+    std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.bin"; bool bBinaryInput  = true;
+    //std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.txt"; bool bBinaryInput = false;
+    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.bin";    bool bBinaryOutput = true;
+    //std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";    bool bBinaryOutput = false;
 
     double TimeWindow    = 1.12;
     double EnergyWinFrom = 0.511 * 0.95;
