@@ -9,6 +9,7 @@ Finder::Finder(std::vector<HitRecord> &hits, double TimeWindow) :
 void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
     if (bDebug) out("-->Looking for coincidences...");
+    int numSingles = 0;
 
     std::sort(Hits.begin(), Hits.end());
 
@@ -20,7 +21,11 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
         int iNextHit = iCurrentHit + 1;
         const HitRecord & nextHit = Hits[iNextHit];
 
-        if (nextHit.Time > thisHit.Time + TimeWindow) continue; //large time gap, not interested in thisHit
+        if (nextHit.Time > thisHit.Time + TimeWindow)
+        {
+            if (bDebug) numSingles++;
+            continue; //large time gap, not interested in thisHit
+        }
 
         //nextHit is within the time window
 
@@ -45,7 +50,11 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
         iCurrentHit = findNextHitOutsideTimeWindow(iCurrentHit) - 1; //cycle will auto-increment the index
     }
 
-    if (bDebug) out("<-Found",Pairs.size(),"coincidences");
+    if (bDebug)
+    {
+        out("<-Found",Pairs.size(),"coincidences");
+        out("  Num singles:",numSingles);
+    }
 }
 
 int Finder::findNextHitOutsideTimeWindow(int iCurrentHit)

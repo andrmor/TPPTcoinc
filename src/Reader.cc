@@ -97,6 +97,10 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
     }
 
     inStream->close();
-    if (bDebug) out("\n<-Read completed\n");
+    if (bDebug)
+    {
+        out("\n<-Read completed\n");
+        out("Loaded",Hits.size(),"events");
+    }
     return "";
 }
