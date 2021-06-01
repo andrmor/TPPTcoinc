@@ -4,8 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-Reader::Reader(const std::string & FileName, bool BinaryInput, double MinEnergy, double MaxEnergy) :
-    bBinary(BinaryInput), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy)
+Reader::Reader(const std::string & FileName, bool BinaryInput, bool bScintPositions, double MinEnergy, double MaxEnergy) :
+    bBinary(BinaryInput), bScintPos(bScintPositions), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy)
 {
     if (bDebug)
     {
@@ -46,8 +46,11 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
             {
                 inStream->read((char*)&iScint, sizeof(int));
                 if (iScint < 0 || iScint >= ScintPos.size()) return "Bad scintillator index";
-                inStream->read((char*)ScintPos[iScint].pos, 3 * sizeof(double));
-                if (bDebug) out("Scint #", iScint, "pos:",ScintPos[iScint].pos[0],ScintPos[iScint].pos[1],ScintPos[iScint].pos[2]);
+                if (bScintPos)
+                {
+                    inStream->read((char*)ScintPos[iScint].pos, 3 * sizeof(double));
+                    if (bDebug) out("Scint #", iScint, "pos:",ScintPos[iScint].pos[0],ScintPos[iScint].pos[1],ScintPos[iScint].pos[2]);
+                }
             }
             else if (ch == (char)0xFF)
             {
@@ -78,10 +81,14 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
             if (line[0] == '#')
             {
                 //new scintillator
-                ss >> dummy >> iScint >> x >> y >> z;
+                ss >> dummy >> iScint;
                 if (iScint < 0 || iScint >= ScintPos.size()) return "Bad scintillator index";
-                ScintPos[iScint] = ScintPosition(x, y, z);
-                if (bDebug) out("Scint #", iScint, x, y, z);
+                if (bScintPos)
+                {
+                    ss >> x >> y >> z;
+                    ScintPos[iScint] = ScintPosition(x, y, z);
+                    if (bDebug) out("Scint #", iScint, x, y, z);
+                }
             }
             else
             {

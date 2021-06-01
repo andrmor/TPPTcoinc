@@ -26,14 +26,16 @@ int main(int argc, char** argv)
 
     std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.bin"; bool bBinaryInput  = true;
     //std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.txt"; bool bBinaryInput = false;
-    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.bin";    bool bBinaryOutput = true;
-    //std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";    bool bBinaryOutput = false;
+    //std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.bin";    bool bBinaryOutput = true;
+    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";    bool bBinaryOutput = false;
+
+    bool   bScintPositions = false; // soon obsolete
 
     double TimeWindow    = 1.12;
     double EnergyWinFrom = 0.511 * 0.95;
     double EnergyWinTo   = 0.511 * 1.05;
 
-    bool bDebug = true;
+    bool bDebug = false;
 
     // --- End of user inits
 
@@ -43,7 +45,7 @@ int main(int argc, char** argv)
     std::vector<ScintPosition> ScintPositions;
     ScintPositions.resize(numScint);
 
-    Reader reader(inputFileName, bBinaryInput, EnergyWinFrom, EnergyWinTo);
+    Reader reader(inputFileName, bBinaryInput, bScintPositions, EnergyWinFrom, EnergyWinTo);
     reader.bDebug = bDebug;
     std::string error = reader.read(Hits, ScintPositions);
     if (!error.empty())
@@ -57,7 +59,7 @@ int main(int argc, char** argv)
     std::vector<CoincidencePair> Pairs;
     cf.findCoincidences(Pairs);
 
-    Writer writer(outputFileName, bBinaryOutput);
+    Writer writer(outputFileName, bBinaryOutput, bScintPositions);
     writer.bDebug = bDebug;
     error = writer.write(Pairs, ScintPositions);
     if (!error.empty())

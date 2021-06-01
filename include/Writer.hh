@@ -13,7 +13,7 @@ class ofstream;
 class Writer
 {
 public:
-    Writer(const std::string & FileName, bool BinaryOutput = false);
+    Writer(const std::string & FileName, bool BinaryOutput, bool bScintPositions);
 
     std::string write(std::vector<CoincidencePair> & CoincPairs, std::vector<ScintPosition> & ScintPositions); // returns error string, empty if success
 
@@ -22,6 +22,7 @@ public:
 private:
     std::ofstream * outStream = nullptr;
     bool bBinaryOutput = false;
+    bool bScintPos     = false;
 };
 
 #endif // writer_h

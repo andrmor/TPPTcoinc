@@ -13,7 +13,7 @@ class ifstream;
 class Reader
 {
 public:
-    Reader(const std::string & FileName, bool BinaryInput, double MinEnergy, double MaxEnergy);
+    Reader(const std::string & FileName, bool BinaryInput, bool bScintPositions, double MinEnergy, double MaxEnergy);
 
     std::string read(std::vector<HitRecord> & Hits, std::vector<ScintPosition> & ScintPos); // returns error string, empty if success
 
@@ -22,6 +22,7 @@ public:
 private:
     std::ifstream * inStream = nullptr;
     bool   bBinary = false;
+    bool   bScintPos = false;
 
     double MinEnergy = 0;
     double MaxEnergy = 1e10;

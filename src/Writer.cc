@@ -5,7 +5,8 @@
 #include <iostream>
 #include <sstream>
 
-Writer::Writer(const std::string & FileName, bool BinaryOutput) : bBinaryOutput(BinaryOutput)
+Writer::Writer(const std::string & FileName, bool BinaryOutput, bool bScintPositions) :
+    bBinaryOutput(BinaryOutput), bScintPos(bScintPositions)
 {
     if (bDebug)
     {
@@ -46,15 +47,33 @@ std::string Writer::write(std::vector<CoincidencePair> & CoincPairs, std::vector
 
         if (bBinaryOutput)
         {
-            outStream->write((char*)p0.pos, 3 * sizeof(double));
-            outStream->write((char*)p1.pos, 3 * sizeof(double));
-            outStream->write((char*)&dt,        sizeof(double));
+            if (bScintPos)
+            {
+                outStream->write((char*)p0.pos, 3 * sizeof(double));
+                outStream->write((char*)p1.pos, 3 * sizeof(double));
+            }
+            else
+            {
+                outStream->write((char*)&cp.Records[0].iScint, sizeof(int));
+                outStream->write((char*)&cp.Records[1].iScint, sizeof(int));
+            }
+            outStream->write((char*)&dt, sizeof(double));
         }
         else
         {
-            *outStream << p0.pos[0] << " " << p0.pos[1] << " " << p0.pos[2] << " "
-                       << p1.pos[0] << " " << p1.pos[1] << " " << p1.pos[2] << " "
-                       << dt << '\n';
+            if (bScintPos)
+            {
+                *outStream << p0.pos[0] << " " << p0.pos[1] << " " << p0.pos[2] << " "
+                           << p1.pos[0] << " " << p1.pos[1] << " " << p1.pos[2] << " "
+                           << dt << '\n';
+            }
+            else
+            {
+                *outStream << cp.Records[0].iScint << " "
+                           << cp.Records[1].iScint << " "
+                           << dt << std::endl;
+            }
+
         }
     }
 
