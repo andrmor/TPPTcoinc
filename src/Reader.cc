@@ -4,8 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-Reader::Reader(const std::string & FileName, bool BinaryInput, bool bScintPositions, double MinEnergy, double MaxEnergy) :
-    bBinary(BinaryInput), bScintPos(bScintPositions), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy)
+Reader::Reader(const std::string & FileName, bool BinaryInput, double MinEnergy, double MaxEnergy) :
+    bBinary(BinaryInput), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy)
 {
     if (bDebug)
     {
@@ -27,7 +27,7 @@ Reader::Reader(const std::string & FileName, bool BinaryInput, bool bScintPositi
     }
 }
 
-std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPosition> & ScintPos)
+std::string Reader::read(std::vector<HitRecord> & Hits)
 {
     if (!inStream) return "Cannot open input file";
 
@@ -45,12 +45,6 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
             if (ch == (char)0xEE)
             {
                 inStream->read((char*)&iScint, sizeof(int));
-                if (iScint < 0 || iScint >= ScintPos.size()) return "Bad scintillator index";
-                if (bScintPos)
-                {
-                    inStream->read((char*)ScintPos[iScint].pos, 3 * sizeof(double));
-                    if (bDebug) out("Scint #", iScint, "pos:",ScintPos[iScint].pos[0],ScintPos[iScint].pos[1],ScintPos[iScint].pos[2]);
-                }
             }
             else if (ch == (char)0xFF)
             {
@@ -68,7 +62,7 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
         std::string line;
 
         char dummy;
-        double x, y, z, time, depo;
+        double time, depo;
 
         while (!inStream->eof())
         {
@@ -82,13 +76,6 @@ std::string Reader::read(std::vector<HitRecord> & Hits, std::vector<ScintPositio
             {
                 //new scintillator
                 ss >> dummy >> iScint;
-                if (iScint < 0 || iScint >= ScintPos.size()) return "Bad scintillator index";
-                if (bScintPos)
-                {
-                    ss >> x >> y >> z;
-                    ScintPos[iScint] = ScintPosition(x, y, z);
-                    if (bDebug) out("Scint #", iScint, x, y, z);
-                }
             }
             else
             {
