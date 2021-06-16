@@ -4,8 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-Reader::Reader(const std::string & FileName, bool BinaryInput, double MinEnergy, double MaxEnergy) :
-    bBinary(BinaryInput), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy)
+Reader::Reader(const std::string & FileName, bool BinaryInput, double MinEnergy, double MaxEnergy, double TimeFrom,  double TimeTo) :
+    bBinary(BinaryInput), MinEnergy(MinEnergy), MaxEnergy(MaxEnergy), TimeFrom(TimeFrom), TimeTo(TimeTo)
 {
     if (bDebug)
     {
@@ -51,8 +51,12 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
                 HitRecord hit(iScint, 0);
                 inStream->read((char*)&hit.Time, sizeof(double));
                 inStream->read((char*)&depo,     sizeof(double));
+
                 if (bDebug) out("Extracted values:", hit.Time, depo);
+
                 if (depo < MinEnergy || depo > MaxEnergy) continue;
+                if (hit.Time < TimeFrom || hit.Time > TimeTo) continue;
+
                 Hits.push_back(hit);
             }
         }
@@ -84,6 +88,8 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
                 if (bDebug) out("Extracted values:", time, depo);
 
                 if (depo < MinEnergy || depo > MaxEnergy) continue;
+                if (time < TimeFrom  || time > TimeTo) continue;
+
                 Hits.push_back( HitRecord(iScint, time) );
                 if (bDebug) out("  Added to HitRecords");
             }
