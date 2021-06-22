@@ -25,15 +25,16 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
 
         if (nextHit.Time > thisHit.Time + TimeWindow)
         {
-            if (bDebug) numSingles++;
-            continue; //large time gap, not interested in thisHit
+            //large time gap, not interested in this hit
+            numSingles++;
+            continue;
         }
 
         //nextHit is within the time window
 
         if (nextHit.iScint == thisHit.iScint)
         {
-            // same scint, not ineterested
+            // same scint, not ineterested in this hit
             iCurrentHit = findNextHitOutsideTimeWindow(iCurrentHit) - 1; //cycle will auto-increment the index
             continue;
         }

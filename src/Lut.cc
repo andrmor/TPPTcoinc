@@ -19,7 +19,7 @@ Lut::Lut(const std::string & FileName)
         while (!inStream.eof())
         {
             getline(inStream, line);
-            out(line);
+            //out(line);
             if (line.empty()) break;
 
             std::stringstream ss(line);
@@ -30,7 +30,7 @@ Lut::Lut(const std::string & FileName)
                   r.HeadNumber >>
                   r.AssemblyAngle;
 
-            r.print();
+            //r.print();
 
             LUT.push_back(r);
         }
