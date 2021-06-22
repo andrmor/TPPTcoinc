@@ -1,4 +1,5 @@
 #include "Finder.hh"
+#include "Lut.hh"
 #include "out.hh"
 
 #include <algorithm>
@@ -6,10 +7,11 @@
 Finder::Finder(std::vector<HitRecord> &hits, double TimeWindow) :
     Hits(hits), TimeWindow(TimeWindow) {}
 
-void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
+void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT, bool bRejectEventsSameHead)
 {
     if (bDebug) out("-->Looking for coincidences...");
-    int numSingles = 0;
+    int numSingles    = 0;
+    int numBadAngular = 0;
 
     std::sort(Hits.begin(), Hits.end());
 
@@ -40,8 +42,13 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
         int iCheckHit = iNextHit + 1;
         if (iCheckHit >= Hits.size() || Hits[iCheckHit].Time > thisHit.Time + TimeWindow)
         {
-            //found a good coincidence!
-            Pairs.push_back(CoincidencePair(thisHit, nextHit));
+            if (!bRejectEventsSameHead || LUT.isDifferentHeads(thisHit.iScint, nextHit.iScint))
+            {
+                //found a good coincidence!
+                Pairs.push_back(CoincidencePair(thisHit, nextHit));
+            }
+            else numBadAngular++;
+
             iCurrentHit = iNextHit; // will be auto-incremented by the cycle
             continue;
         }
@@ -50,11 +57,9 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs)
         iCurrentHit = findNextHitOutsideTimeWindow(iCurrentHit) - 1; //cycle will auto-increment the index
     }
 
-    if (bDebug)
-    {
-        out("<-Found",Pairs.size(),"coincidences");
-        out("  Num singles:",numSingles);
-    }
+    out("Found",Pairs.size(),"coincidences");
+    out("  Num singles:", numSingles);
+    if (bRejectEventsSameHead) out("  Num rejected based on angle:", numBadAngular);
 }
 
 int Finder::findNextHitOutsideTimeWindow(int iCurrentHit)

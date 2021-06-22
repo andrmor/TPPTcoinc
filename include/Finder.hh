@@ -5,14 +5,16 @@
 
 #include <vector>
 
+class Lut;
+
 class Finder
 {
 public:
     Finder(std::vector<HitRecord> & hits, double TimeWindow);
 
-    void findCoincidences(std::vector<CoincidencePair> & Pairs);
+    void findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT, bool bRejectEventsSameHead);
 
-    bool bDebug = true;
+    bool bDebug = false;
 
 private:
     std::vector<HitRecord> & Hits;

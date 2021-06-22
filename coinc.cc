@@ -1,4 +1,5 @@
 ﻿#include "DataStructures.hh"
+#include "Lut.hh"
 #include "Reader.hh"
 #include "Finder.hh"
 #include "Writer.hh"
@@ -10,36 +11,48 @@
 // Input file format:
 //
 // # iScint                     iScint is the scintillator's index
-// t1 e1
+// t1 e1                        t is the time of the hit [ns], e is the event energy [MeV]
 // t2 e2
 // ...
-// tn en                        tn is the time of the n-th hit [ns], en is the n-th hit energy [MeV]
+// tn en
 // # ...                        next scintillator index
 
 //Output file format
 //
-// i1 i2 dt                     i1 and i2 are the scintullator's indexes, dt is (t2 - t1)
+// i1 i2 dt                     i1 and i2 are the scintullator's indexes, dt is delta time (t2 - t1)
 
 int main(int argc, char** argv)
 {
     // --- Start of user inits ---
 
-    std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.bin"; bool bBinaryInput  = true;
-    //std::string inputFileName  = "/home/andr/WORK/TPPT/BuilderOutput.txt"; bool bBinaryInput = false;
-    //std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.bin";    bool bBinaryOutput = true;
-    std::string outputFileName = "/home/andr/WORK/TPPT/CoincPairs.txt";    bool bBinaryOutput = false;
+    std::string dir            = "/home/andr/WORK/TPPT";
 
-    double CoincidenceWindow = 4.0; //ns
+    std::string inputFileName  = "/BuilderOutput.bin"; bool bBinaryInput  = true;
+    //std::string inputFileName  = "BuilderOutput.txt";  bool bBinaryInput = false;
+    //std::string outputFileName = "CoincPairs.bin";     bool bBinaryOutput = true;
+    std::string outputFileName = "CoincPairs.txt";     bool bBinaryOutput = false;
 
-    double TimeFrom = 4.0 * 1e6; //4 ms
-    double TimeTo   = 5.0 * 60.0 * 1e9; // 5 min
+    std::string lutFileName    = "LUT.txt";
 
-    double EnergyWinFrom = 0.511 * 0.95;
+    bool   bRejectEventsSameHead = true;
+
+    double CoincidenceWindow = 4.0;      // [ns]
+
+    double TimeFrom = 4.0 * 1e6;         // 4 ms
+    double TimeTo   = 5.0 * 60.0 * 1e9;  // 5 min
+
+    double EnergyWinFrom = 0.511 * 0.95; // [MeV]
     double EnergyWinTo   = 0.511 * 1.05;
 
     bool bDebug = false;
 
     // --- End of user inits
+
+    inputFileName  = dir + '/' + inputFileName;
+    outputFileName = dir + '/' + outputFileName;
+    lutFileName    = dir + '/' + lutFileName;
+
+    Lut LUT(lutFileName);
 
     std::vector<HitRecord> Hits;
 
@@ -55,7 +68,7 @@ int main(int argc, char** argv)
     Finder cf(Hits, CoincidenceWindow);
     cf.bDebug = bDebug;
     std::vector<CoincidencePair> Pairs;
-    cf.findCoincidences(Pairs);
+    cf.findCoincidences(Pairs, LUT, bRejectEventsSameHead);
 
     Writer writer(outputFileName, bBinaryOutput);
     writer.bDebug = bDebug;
