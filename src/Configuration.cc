@@ -38,7 +38,7 @@ void Configuration::saveConfig(const std::string & fileName) const
 
     std::string json_str = json11::Json(json).dump();
     std::ofstream confStream;
-    confStream.open(fileName);
+    confStream.open(WorkingDirectory + '/' + fileName);
     if (confStream.is_open())
         confStream << json_str << std::endl;
     confStream.close();

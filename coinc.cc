@@ -47,24 +47,24 @@ int main(int argc, char** argv)
     {
         // --- Start of user inits ---
 
-        Config.WorkingDirectory = "/home/andr/WORK/TPPT";
+        Config.WorkingDirectory  = "/home/andr/WORK/TPPT";
 
-        Config.InputFileName  = "/BuilderOutput.bin"; Config.BinaryInput  = true;
-        //Config.InputFileName  = "BuilderOutput.txt";  Config.BinaryInput = false;
-        //Config.OutputFileName = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName = "CoincPairs.txt";     Config.BinaryOutput = false;
+        //Config.InputFileName     = "/BuilderOutput.bin"; Config.BinaryInput  = true;
+        Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
+        //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
+        Config.OutputFileName    = "CoincPairs.txt";     Config.BinaryOutput = false;
 
-        Config.LutFileName    = "LUT.txt";
+        Config.LutFileName       = "LUT.txt";
 
-        Config.RejectSameHead = true;
+        Config.RejectSameHead    = true;
 
         Config.CoincidenceWindow = 4.0;      // [ns]
 
-        Config.TimeFrom = 4.0 * 1e6;         // 4 ms
-        Config.TimeTo   = 5.0 * 60.0 * 1e9;  // 5 min
+        Config.TimeFrom          = 0;
+        Config.TimeTo            = 1e50;
 
-        Config.EnergyFrom = 0.511 * 0.95; // [MeV]
-        Config.EnergyTo   = 0.511 * 1.05;
+        Config.EnergyFrom        = 0.511 * 0.95; // [MeV]
+        Config.EnergyTo          = 0.511 * 1.05;
 
         // --- End of user inits
     }
