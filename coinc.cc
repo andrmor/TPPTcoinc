@@ -3,6 +3,7 @@
 #include "Reader.hh"
 #include "Finder.hh"
 #include "Writer.hh"
+#include "Configuration.hh"
 #include "out.hh"
 
 #include <string>
@@ -23,41 +24,56 @@
 
 int main(int argc, char** argv)
 {
-    // --- Start of user inits ---
+    Configuration & Config = Configuration::getInstance();
 
-    std::string dir            = "/home/andr/WORK/TPPT";
+    std::string filename;
+    if (argc > 1)
+    {
+        filename = std::string(argv[1]);
+        out("\nLoading config from file:", filename);
+    }
+    else out("\nNo config file provided as argument, using configuration defined in the main of the coinc");
 
-    std::string inputFileName  = "/BuilderOutput.bin"; bool bBinaryInput  = true;
-    //std::string inputFileName  = "BuilderOutput.txt";  bool bBinaryInput = false;
-    //std::string outputFileName = "CoincPairs.bin";     bool bBinaryOutput = true;
-    std::string outputFileName = "CoincPairs.txt";     bool bBinaryOutput = false;
+    // warning: automatically saves config (if no errors) in working directory as CoincConfig.json
+    // beware of possible overright!
+    //here you can directly provide the config file name
+    //filename = "/home/andr/WORK/TPPT/CoincConfig1.json";
 
-    std::string lutFileName    = "LUT.txt";
+    if (!filename.empty())
+    {
+        Config.loadConfig(filename);
+    }
+    else
+    {
+        // --- Start of user inits ---
 
-    bool   bRejectEventsSameHead = true;
+        Config.WorkingDirectory = "/home/andr/WORK/TPPT";
 
-    double CoincidenceWindow = 4.0;      // [ns]
+        Config.InputFileName  = "/BuilderOutput.bin"; Config.BinaryInput  = true;
+        //Config.InputFileName  = "BuilderOutput.txt";  Config.BinaryInput = false;
+        //Config.OutputFileName = "CoincPairs.bin";     Config.BinaryOutput = true;
+        Config.OutputFileName = "CoincPairs.txt";     Config.BinaryOutput = false;
 
-    double TimeFrom = 4.0 * 1e6;         // 4 ms
-    double TimeTo   = 5.0 * 60.0 * 1e9;  // 5 min
+        Config.LutFileName    = "LUT.txt";
 
-    double EnergyWinFrom = 0.511 * 0.95; // [MeV]
-    double EnergyWinTo   = 0.511 * 1.05;
+        Config.RejectSameHead = true;
 
-    bool bDebug = false;
+        Config.CoincidenceWindow = 4.0;      // [ns]
 
-    // --- End of user inits
+        Config.TimeFrom = 4.0 * 1e6;         // 4 ms
+        Config.TimeTo   = 5.0 * 60.0 * 1e9;  // 5 min
 
-    inputFileName  = dir + '/' + inputFileName;
-    outputFileName = dir + '/' + outputFileName;
-    lutFileName    = dir + '/' + lutFileName;
+        Config.EnergyFrom = 0.511 * 0.95; // [MeV]
+        Config.EnergyTo   = 0.511 * 1.05;
 
-    Lut LUT(lutFileName);
+        // --- End of user inits
+    }
+
+    Lut LUT(Config.WorkingDirectory + '/' + Config.LutFileName);
 
     std::vector<HitRecord> Hits;
 
-    Reader reader(inputFileName, bBinaryInput, EnergyWinFrom, EnergyWinTo, TimeFrom, TimeTo);
-    reader.bDebug = bDebug;
+    Reader reader;
     std::string error = reader.read(Hits);
     if (!error.empty())
     {
@@ -65,17 +81,17 @@ int main(int argc, char** argv)
         exit(2);
     }
 
-    Finder cf(Hits, CoincidenceWindow);
-    cf.bDebug = bDebug;
+    Finder cf(Hits);
     std::vector<CoincidencePair> Pairs;
-    cf.findCoincidences(Pairs, LUT, bRejectEventsSameHead);
+    cf.findCoincidences(Pairs, LUT);
 
-    Writer writer(outputFileName, bBinaryOutput);
-    writer.bDebug = bDebug;
+    Writer writer;
     error = writer.write(Pairs);
     if (!error.empty())
     {
         out(error);
         exit(3);
     }
+
+    Config.saveConfig("CoincConfig.json");
 }
