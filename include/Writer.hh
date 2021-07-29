@@ -15,12 +15,12 @@ public:
 
     std::string write(std::vector<CoincidencePair> & CoincPairs); // returns error string, empty if success
 
-    bool bDebug = true;
-
 private:
     const Configuration & Config;
 
     std::ofstream * outStream = nullptr;
+
+    bool bDebug = false;
 };
 
 #endif // writer_h

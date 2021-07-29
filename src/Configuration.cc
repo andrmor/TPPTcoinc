@@ -18,7 +18,7 @@ void Configuration::saveConfig(const std::string & fileName) const
 
     json["WorkingDirectory"]  = WorkingDirectory;
 
-    json["InputFileNames"]    = InputFileName;
+    json["InputFileName"]     = InputFileName;
     json["BinaryInput"]       = BinaryInput;
 
     json["OutputFileName"]    = OutputFileName;

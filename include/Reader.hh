@@ -15,12 +15,12 @@ public:
 
     std::string read(std::vector<HitRecord> & Hits); // returns error string, empty if success
 
-    bool bDebug = true;
-
 private:
     const Configuration & Config;
 
     std::ifstream * inStream = nullptr;
+
+    bool bDebug = false;
 };
 
 #endif // reader_h
