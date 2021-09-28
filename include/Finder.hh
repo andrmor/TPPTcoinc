@@ -5,20 +5,21 @@
 
 #include <vector>
 
+class Configuration;
 class Lut;
 
 class Finder
 {
 public:
-    Finder(std::vector<HitRecord> & hits, double TimeWindow);
+    Finder(std::vector<HitRecord> & hits);
 
-    void findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT, bool bRejectEventsSameHead);
-
-    bool bDebug = false;
+    void findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT);
 
 private:
+    const Configuration    & Config;
     std::vector<HitRecord> & Hits;
-    double TimeWindow     = 1e20;
+
+    bool bDebug = false;
 
     int findNextHitOutsideTimeWindow(int iCurrentHit);
 };

@@ -1,20 +1,22 @@
 #include "Finder.hh"
+#include "Configuration.hh"
 #include "Lut.hh"
 #include "out.hh"
 
 #include <algorithm>
 
-Finder::Finder(std::vector<HitRecord> &hits, double TimeWindow) :
-    Hits(hits), TimeWindow(TimeWindow) {}
+Finder::Finder(std::vector<HitRecord> & hits) :
+    Config(Configuration::getInstance()),  Hits(hits) {}
 
-void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT, bool bRejectEventsSameHead)
+void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT)
 {
-    if (bDebug) out("-->Looking for coincidences...");
     int numSingles    = 0;
     int numBadAngular = 0;
 
+    out("-->Sorting hits");
     std::sort(Hits.begin(), Hits.end());
 
+    out("-->Finding coincidences");
     for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
     {
         const HitRecord & thisHit = Hits[iCurrentHit];
@@ -23,7 +25,7 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
         int iNextHit = iCurrentHit + 1;
         const HitRecord & nextHit = Hits[iNextHit];
 
-        if (nextHit.Time > thisHit.Time + TimeWindow)
+        if (nextHit.Time > thisHit.Time + Config.CoincidenceWindow)
         {
             //large time gap, not interested in this hit
             numSingles++;
@@ -41,9 +43,9 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
 
         //check that the nextnext is outside the window, otherwise disreguard all within the window
         int iCheckHit = iNextHit + 1;
-        if (iCheckHit >= Hits.size() || Hits[iCheckHit].Time > thisHit.Time + TimeWindow)
+        if (iCheckHit >= Hits.size() || Hits[iCheckHit].Time > thisHit.Time + Config.CoincidenceWindow)
         {
-            if (!bRejectEventsSameHead || LUT.isDifferentHeads(thisHit.iScint, nextHit.iScint))
+            if (!Config.RejectSameHead || LUT.isDifferentHeads(thisHit.iScint, nextHit.iScint))
             {
                 //found a good coincidence!
                 Pairs.push_back(CoincidencePair(thisHit, nextHit));
@@ -58,16 +60,16 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
         iCurrentHit = findNextHitOutsideTimeWindow(iCurrentHit) - 1; //cycle will auto-increment the index
     }
 
-    out("Found",Pairs.size(),"coincidences");
+    out("Found", Pairs.size(), "coincidences");
     out("  Num singles:", numSingles);
-    if (bRejectEventsSameHead) out("  Num rejected based on angle:", numBadAngular);
+    if (Config.RejectSameHead) out("  Num rejected based on detector head:", numBadAngular);
 }
 
 int Finder::findNextHitOutsideTimeWindow(int iCurrentHit)
 {
     int iOtherHit = iCurrentHit;
 
-    while ( Hits[iOtherHit].Time < (Hits[iCurrentHit].Time + TimeWindow) ) // dummy first cycle for safety
+    while ( Hits[iOtherHit].Time < (Hits[iCurrentHit].Time + Config.CoincidenceWindow) ) // dummy first cycle for safety
     {
         iOtherHit++;
         if (iOtherHit >= Hits.size()) break;
