@@ -24,7 +24,10 @@ void Configuration::saveConfig(const std::string & fileName) const
     json["OutputFileName"]    = OutputFileName;
     json["BinaryOutput"]      = BinaryOutput;
 
+    json["HeaderFileName"]    = HeaderFileName;
+
     json["LutFileName"]       = LutFileName;
+    json["ExportLutFileName"] = ExportLutFileName;
 
     json["RejectSameHead"]    = RejectSameHead;
 
@@ -81,7 +84,10 @@ void Configuration::loadConfig(const std::string & fileName)
     jstools::readString(json, "OutputFileName",    OutputFileName);
     jstools::readBool  (json, "BinaryOutput",      BinaryOutput);
 
+    jstools::readString(json, "HeaderFileName",    HeaderFileName);
+
     jstools::readString(json, "LutFileName",       LutFileName);
+    jstools::readString(json, "ExportLutFileName", ExportLutFileName);
 
     jstools::readBool  (json, "RejectSameHead",    RejectSameHead);
 
@@ -92,6 +98,36 @@ void Configuration::loadConfig(const std::string & fileName)
 
     jstools::readDouble(json, "EnergyFrom",        EnergyFrom);
     jstools::readDouble(json, "EnergyTo",          EnergyTo);
+}
+
+void Configuration::writeHeaderLine(std::ofstream & hStream, std::vector<std::string> fields)
+{
+    for (size_t i = 0; i < fields.size(); i++)
+    {
+        if (i != 0) hStream << ',';
+        hStream << fields[i];
+    }
+    hStream << '\n';
+}
+
+void Configuration::saveHeaderFile(size_t NumPairs)
+{
+    std::ofstream hStream;
+    hStream.open(WorkingDirectory + '/' + HeaderFileName);
+
+    if (!hStream.is_open())
+    {
+        out("Failed to open header file!");
+        return;
+    }
+
+    writeHeaderLine(hStream, {"Format version", "1.1"});
+    writeHeaderLine(hStream, {"Format type", "1"});
+    writeHeaderLine(hStream, {"Data file", OutputFileName});
+    writeHeaderLine(hStream, {"Data type", "1"});
+    writeHeaderLine(hStream, {"Number of events", std::to_string(NumPairs)});
+    writeHeaderLine(hStream, {"Data mode", (BinaryOutput ? "2" : "1")});
+    writeHeaderLine(hStream, {"Crystal LUT file", ExportLutFileName});
 }
 
 #include <sys/types.h>

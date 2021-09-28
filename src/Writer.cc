@@ -29,23 +29,26 @@ std::string Writer::write(std::vector<CoincidencePair> & CoincPairs)
 {
     if (!outStream) return "Cannot open output file";
 
-    if (bDebug) out("->Writing coincidences", "(", CoincPairs.size(), ")", "to file...");
+    out("->Writing coincidences", "(", CoincPairs.size(), ")", "to file...");
 
     for (const CoincidencePair & cp : CoincPairs)
     {
-        double dt = cp.Records[1].Time - cp.Records[0].Time;
+        float dt    = (cp.Records[0].Time - cp.Records[1].Time) * 1000; // in ps
+        float time0 = cp.Records[0].Time * 1e-6; // in ms
 
         if (Config.BinaryOutput)
         {
             outStream->write((char*)&cp.Records[0].iScint, sizeof(int));
             outStream->write((char*)&cp.Records[1].iScint, sizeof(int));
-            outStream->write((char*)&dt, sizeof(double));
+            outStream->write((char*)&dt,                   sizeof(float));
+            outStream->write((char*)&time0,                 sizeof(float));
         }
         else
         {
-            *outStream << cp.Records[0].iScint << " "
-                       << cp.Records[1].iScint << " "
-                       << dt << std::endl;
+            *outStream << cp.Records[0].iScint << ','
+                       << cp.Records[1].iScint << ','
+                       << dt                   << ','
+                       << time0                << '\n';
         }
     }
 

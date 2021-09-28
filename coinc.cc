@@ -34,10 +34,11 @@ int main(int argc, char** argv)
     }
     else out("\nNo config file provided as argument, using configuration defined in the main of the coinc");
 
-    // warning: automatically saves config (if no errors) in working directory as CoincConfig.json
-    // beware of possible overright!
-    //here you can directly provide the config file name
-    filename = "/home/andr/WORK/TPPT/CoincConfig1.json";
+        // warning: automatically saves config (if no errors) in working directory as CoincConfig.json
+        // beware of possible overright!
+
+        //here you can directly provide the config file name
+    //filename = "/home/andr/WORK/TPPT/CoincConfig1.json";
 
     if (!filename.empty())
     {
@@ -54,7 +55,10 @@ int main(int argc, char** argv)
         //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
         Config.OutputFileName    = "CoincPairs.txt";     Config.BinaryOutput = false;
 
+        Config.HeaderFileName    = "Header.hlm";
+
         Config.LutFileName       = "LUT.txt";
+        Config.ExportLutFileName = "CrystalLUT.txt";
 
         Config.RejectSameHead    = true;
 
@@ -94,4 +98,7 @@ int main(int argc, char** argv)
     }
 
     Config.saveConfig("CoincConfig.json");
+
+    Config.saveHeaderFile(Pairs.size());
+    LUT.exportLUT(Config.WorkingDirectory + '/' + Config.ExportLutFileName);
 }

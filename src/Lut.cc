@@ -62,8 +62,24 @@ bool Lut::isDifferentHeads(int iScint1, int iScint2) const
     exit(10);
 }
 
-
 void LutRecord::print()
 {
     out("(",Position[0],Position[1],Position[2],")", "(",Normal[0],Normal[1],Normal[2],")", HeadNumber, AssemblyAngle);
+}
+
+void Lut::exportLUT(const std::string & FileName)
+{
+    std::ofstream hStream;
+    hStream.open(FileName);
+
+    if (!hStream.is_open())
+    {
+        out("Failed to open file to export LUT file!");
+        return;
+    }
+
+    for (size_t i = 0; i < LUT.size(); i++)
+        hStream << i << ',' << LUT[i].Position[0] << ',' << LUT[i].Position[1] << ',' << LUT[i].Position[2] << '\n';
+
+    hStream.close();
 }

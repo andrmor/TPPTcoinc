@@ -19,6 +19,8 @@ public:
     void saveConfig(const std::string & fileName) const;
     void loadConfig(const std::string & fileName);
 
+    void saveHeaderFile(size_t NumPairs);
+
     std::string WorkingDirectory;
 
     std::string InputFileName;
@@ -27,7 +29,10 @@ public:
     std::string OutputFileName;
     bool BinaryOutput;
 
-    std::string LutFileName  = "LUT.txt";
+    std::string HeaderFileName = "Header.hlm";
+
+    std::string LutFileName        = "LUT.txt";
+    std::string ExportLutFileName  = "CrystalLUT.txt";
 
     bool   RejectSameHead    = true;
 
@@ -42,8 +47,9 @@ public:
     double EnergyTo       = 0.511 * 1.05;
 
 private:
-    int isDirExist(const std::string  & dirName);
-    int isFileExist(const std::string & fileName);
+    int  isDirExist(const std::string  & dirName);
+    int  isFileExist(const std::string & fileName);
+    void writeHeaderLine(std::ofstream & hStream, std::vector<std::string> fields);
 };
 
 #endif // configuration_h
