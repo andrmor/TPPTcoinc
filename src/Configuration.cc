@@ -121,13 +121,13 @@ void Configuration::saveHeaderFile(size_t NumPairs)
         return;
     }
 
-    writeHeaderLine(hStream, {"Format version", "1.1"});
-    writeHeaderLine(hStream, {"Format type", "1"});
-    writeHeaderLine(hStream, {"Data file", OutputFileName});
-    writeHeaderLine(hStream, {"Data type", "1"});
-    writeHeaderLine(hStream, {"Number of events", std::to_string(NumPairs)});
-    writeHeaderLine(hStream, {"Data mode", (BinaryOutput ? "2" : "1")});
-    writeHeaderLine(hStream, {"Crystal LUT file", ExportLutFileName});
+    writeHeaderLine(hStream, {"\"Format version\"", "1.1"});
+    writeHeaderLine(hStream, {"\"Format type\"", "1"});
+    writeHeaderLine(hStream, {"\"Data file\"", "\""+OutputFileName+"\""});
+    writeHeaderLine(hStream, {"\"Data type\"", "1"});
+    writeHeaderLine(hStream, {"\"Number of events\"", std::to_string(NumPairs)});
+    writeHeaderLine(hStream, {"\"Data mode\"", (BinaryOutput ? "2" : "1")});
+    writeHeaderLine(hStream, {"\"Crystal LUT file\"", "\""+ExportLutFileName+"\""});
 }
 
 #include <sys/types.h>
