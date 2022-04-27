@@ -5,7 +5,8 @@
 #include <fstream>
 #include <sstream>
 
-Reader::Reader() : Config(Configuration::getInstance())
+Reader::Reader(bool EnforceTimeEnergy) :
+    Config(Configuration::getInstance()), bEnforceTimeEnergy(EnforceTimeEnergy)
 {
     std::string FileName = Config.WorkingDirectory + '/' + Config.InputFileName;
     out("Input file:", FileName);
@@ -44,14 +45,17 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
             }
             else if (ch == (char)0xFF)
             {
-                HitRecord hit(iScint, 0);
-                inStream->read((char*)&hit.Time, sizeof(double));
-                inStream->read((char*)&depo,     sizeof(double));
+                HitRecord hit(iScint, 0, 0);
+                inStream->read((char*)&hit.Time,   sizeof(double));
+                inStream->read((char*)&hit.Energy, sizeof(double));
 
                 if (bDebug) out("Extracted values:", hit.Time, depo);
 
-                if (depo < Config.EnergyFrom || depo > Config.EnergyTo) continue;
-                if (hit.Time < Config.TimeFrom || hit.Time > Config.TimeTo) continue;
+                if (bEnforceTimeEnergy)
+                {
+                    if (depo     < Config.EnergyFrom || depo     > Config.EnergyTo) continue;
+                    if (hit.Time < Config.TimeFrom   || hit.Time > Config.TimeTo)   continue;
+                }
 
                 Hits.push_back(hit);
             }
@@ -83,10 +87,13 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
                 ss >> time >> depo;
                 if (bDebug) out("Extracted values:", time, depo);
 
-                if (depo < Config.EnergyFrom || depo > Config.EnergyTo) continue;
-                if (time < Config.TimeFrom      || time > Config.TimeTo)      continue;
+                if (bEnforceTimeEnergy)
+                {
+                    if (depo < Config.EnergyFrom || depo > Config.EnergyTo) continue;
+                    if (time < Config.TimeFrom   || time > Config.TimeTo)   continue;
+                }
 
-                Hits.push_back( HitRecord(iScint, time) );
+                Hits.push_back( HitRecord(iScint, time, depo) );
                 if (bDebug) out("  Added to HitRecords");
             }
         }

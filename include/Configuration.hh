@@ -34,6 +34,7 @@ public:
     std::string LutFileName        = "LUT.txt";
     std::string ExportLutFileName  = "CrystalLUT.txt";
 
+    int    FinderMethod      = 1;
     bool   RejectSameHead    = true;
 
     double CoincidenceWindow = 4.0; // [ns]

@@ -1,5 +1,5 @@
-#ifndef clusterer_h
-#define clusterer_h
+#ifndef finder1_h
+#define finder1_h
 
 #include "DataStructures.hh"
 
@@ -8,20 +8,21 @@
 class Configuration;
 class Lut;
 
-class Finder
+class Finder1
 {
 public:
-    Finder(std::vector<HitRecord> & hits);
+    Finder1(std::vector<HitRecord> & hits, const Lut & lut);
 
-    void findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT);
+    void findCoincidences(std::vector<CoincidencePair> & Pairs);
 
 private:
     const Configuration    & Config;
     std::vector<HitRecord> & Hits;
+    const Lut              & LUT;
 
     bool bDebug = false;
 
     int findNextHitOutsideTimeWindow(int iCurrentHit);
 };
 
-#endif // clusterer_h
+#endif // finder1_h

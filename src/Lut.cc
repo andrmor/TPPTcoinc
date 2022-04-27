@@ -28,7 +28,8 @@ Lut::Lut(const std::string & FileName)
             ss >> r.Position[0] >> r.Position[1] >> r.Position[2] >>
                   r.Normal[0]   >> r.Normal[1]   >> r.Normal[2]   >>
                   r.HeadNumber >>
-                  r.AssemblyAngle;
+                  r.AssemblyAngle >>
+                  r.AssemblyIndex;
 
             //r.print();
 
@@ -53,6 +54,17 @@ int Lut::getHeadNumber(int iScint) const
     }
 }
 
+int Lut::getAssemblyIndex(int iScint) const
+{
+    if (iScint >= 0 && iScint < LUT.size())
+        return LUT[iScint].AssemblyIndex;
+    else
+    {
+        out("Bad scintillator index", iScint, "-> LUT has", LUT.size(), "records");
+        exit(10);
+    }
+}
+
 bool Lut::isDifferentHeads(int iScint1, int iScint2) const
 {
     if (iScint1 >= 0 && iScint1 < LUT.size() &&
@@ -64,7 +76,7 @@ bool Lut::isDifferentHeads(int iScint1, int iScint2) const
 
 void LutRecord::print()
 {
-    out("(",Position[0],Position[1],Position[2],")", "(",Normal[0],Normal[1],Normal[2],")", HeadNumber, AssemblyAngle);
+    out("(",Position[0],Position[1],Position[2],")", "(",Normal[0],Normal[1],Normal[2],")", HeadNumber, AssemblyAngle, AssemblyIndex);
 }
 
 void Lut::exportLUT(const std::string & FileName)

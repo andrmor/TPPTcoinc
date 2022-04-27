@@ -11,13 +11,14 @@ struct ScintPosition
 
 struct HitRecord
 {
-    HitRecord(int scint, double time) : iScint(scint), Time(time) {}
+    HitRecord(int scint, double time, double energy) : iScint(scint), Time(time), Energy(energy) {}
     HitRecord(){}
 
     bool operator<(const HitRecord & other) const {return Time < other.Time;}
 
     int    iScint;
     double Time;
+    double Energy;
 };
 
 struct CoincidencePair

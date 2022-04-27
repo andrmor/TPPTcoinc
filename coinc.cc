@@ -1,13 +1,15 @@
 ﻿#include "DataStructures.hh"
 #include "Lut.hh"
 #include "Reader.hh"
-#include "Finder.hh"
+#include "Finder1.hh"
+#include "Finder2.hh"
 #include "Writer.hh"
 #include "Configuration.hh"
 #include "out.hh"
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // Input file format:
 //
@@ -20,7 +22,7 @@
 
 //Output file format
 //
-// i1 i2 dt                     i1 and i2 are the scintullator's indexes, dt is delta time (t2 - t1)
+// i1 i2 dt t1                    i1 and i2 are the scintullator's indexes, dt is delta time (t1 - t2) [ps], t1 is time in [ms]
 
 int main(int argc, char** argv)
 {
@@ -48,18 +50,20 @@ int main(int argc, char** argv)
     {
         // --- Start of user inits ---
 
-        Config.WorkingDirectory  = "/home/andr/WORK/TPPT";
+        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/Na22";
 
-        //Config.InputFileName     = "/BuilderOutput.bin"; Config.BinaryInput  = true;
-        Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
+        Config.InputFileName     = "BuilderOutput1e7a.bin"; Config.BinaryInput  = true;
+        //Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
         //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairs.txt";     Config.BinaryOutput = false;
+        Config.OutputFileName    = "CoincPairs1e7a.txt";     Config.BinaryOutput = false;
 
         Config.HeaderFileName    = "Header.hlm";
 
         Config.LutFileName       = "LUT.txt";
         Config.ExportLutFileName = "CrystalLUT.txt";
 
+        Config.FinderMethod      = 1;  // 1 - first implemented, no energy splitting allowed
+                                       // 2 - second one, energy is allowed to be split within the same assembly
         Config.RejectSameHead    = true;
 
         Config.CoincidenceWindow = 4.0;      // [ns]
@@ -76,8 +80,10 @@ int main(int argc, char** argv)
     Lut LUT(Config.WorkingDirectory + '/' + Config.LutFileName);
 
     std::vector<HitRecord> Hits;
+    std::vector<CoincidencePair> Pairs;
 
-    Reader reader;
+    const bool EnforceEnergyTimeInReader = (Config.FinderMethod == 1);
+    Reader reader(EnforceEnergyTimeInReader);
     std::string error = reader.read(Hits);
     if (!error.empty())
     {
@@ -85,9 +91,27 @@ int main(int argc, char** argv)
         exit(2);
     }
 
-    Finder cf(Hits);
-    std::vector<CoincidencePair> Pairs;
-    cf.findCoincidences(Pairs, LUT);
+    out("-->Sorting hits");
+    std::sort(Hits.begin(), Hits.end());
+
+    switch (Config.FinderMethod)
+    {
+    case 1:
+        {
+            Finder1 cf(Hits, LUT);
+            cf.findCoincidences(Pairs);
+        }
+        break;
+    case 2:
+        {
+            Finder2 cf(Hits, LUT);
+            cf.findCoincidences(Pairs);
+        }
+        break;
+    default:
+        out("Unknown finder method");
+        exit(20);
+    }
 
     Writer writer;
     error = writer.write(Pairs);

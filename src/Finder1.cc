@@ -1,20 +1,15 @@
-#include "Finder.hh"
+#include "Finder1.hh"
 #include "Configuration.hh"
 #include "Lut.hh"
 #include "out.hh"
 
-#include <algorithm>
+Finder1::Finder1(std::vector<HitRecord> & hits, const Lut & lut) :
+    Config(Configuration::getInstance()),  Hits(hits), LUT(lut) {}
 
-Finder::Finder(std::vector<HitRecord> & hits) :
-    Config(Configuration::getInstance()),  Hits(hits) {}
-
-void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & LUT)
+void Finder1::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
     int numSingles    = 0;
     int numBadAngular = 0;
-
-    out("-->Sorting hits");
-    std::sort(Hits.begin(), Hits.end());
 
     out("-->Finding coincidences");
     for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
@@ -34,7 +29,7 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
 
         //nextHit is within the time window
 
-        if (nextHit.iScint == thisHit.iScint)
+        if (nextHit.iScint == thisHit.iScint) // paranoic, cannot happen with currently used long integration / dead times
         {
             // same scint, not ineterested in this hit
             iCurrentHit = findNextHitOutsideTimeWindow(iCurrentHit) - 1; //cycle will auto-increment the index
@@ -65,7 +60,7 @@ void Finder::findCoincidences(std::vector<CoincidencePair> & Pairs, const Lut & 
     if (Config.RejectSameHead) out("  Num rejected based on detector head:", numBadAngular);
 }
 
-int Finder::findNextHitOutsideTimeWindow(int iCurrentHit)
+int Finder1::findNextHitOutsideTimeWindow(int iCurrentHit)
 {
     int iOtherHit = iCurrentHit;
 

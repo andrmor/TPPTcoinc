@@ -33,7 +33,7 @@ std::string Writer::write(std::vector<CoincidencePair> & CoincPairs)
 
     for (const CoincidencePair & cp : CoincPairs)
     {
-        float dt    = (cp.Records[0].Time - cp.Records[1].Time) * 1000; // in ps
+        float dt    = (cp.Records[0].Time - cp.Records[1].Time) * 1000.0; // in ps
         float time0 = cp.Records[0].Time * 1e-6; // in ms
 
         if (Config.BinaryOutput)
@@ -41,7 +41,7 @@ std::string Writer::write(std::vector<CoincidencePair> & CoincPairs)
             outStream->write((char*)&cp.Records[0].iScint, sizeof(int));
             outStream->write((char*)&cp.Records[1].iScint, sizeof(int));
             outStream->write((char*)&dt,                   sizeof(float));
-            outStream->write((char*)&time0,                 sizeof(float));
+            outStream->write((char*)&time0,                sizeof(float));
         }
         else
         {

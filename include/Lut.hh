@@ -11,6 +11,7 @@ struct LutRecord
 
     int    HeadNumber;
     double AssemblyAngle;
+    double AssemblyIndex;
 
     void   print();
 };
@@ -23,6 +24,7 @@ public:
     int  countScintillators() const;
 
     int  getHeadNumber(int iScint) const;
+    int  getAssemblyIndex(int iScint) const;
     bool isDifferentHeads(int iScint1, int iScint2) const;
 
     void exportLUT(const std::string & FileName);
