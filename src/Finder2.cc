@@ -2,22 +2,30 @@
 #include "Configuration.hh"
 #include "Lut.hh"
 #include "out.hh"
+#include "Hist1D.hh"
 
 #include <algorithm>
 
 Finder2::Finder2(std::vector<HitRecord> & hits, const Lut & lut) :
-    Config(Configuration::getInstance()),  Hits(hits), LUT(lut) {}
+    Config(Configuration::getInstance()),  Hits(hits), LUT(lut)
+{
+    histMulti = new Hist1D(14, 1, 15);
+}
+
+Finder2::~Finder2()
+{
+    delete histMulti;
+}
 
 void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
-    int numSingles    = 0;
+    int numSingles = 0;
     int numMulti = 0;
     int numBadEnergy = 0;
     int numSameHead = 0;
 
     std::vector<HitRecord> HitsWithin;
 
-    out("-->Finding coincidences");
     for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
     {
         const HitRecord & thisHit = Hits[iCurrentHit];
@@ -30,6 +38,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         {
             //large time gap, not interested in this hit
             numSingles++;
+            histMulti->fill(1.0);
             continue;
         }
 
@@ -41,6 +50,8 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
             iNextHit++;
         }
         while (iNextHit < Hits.size() && Hits[iNextHit].Time < thisHit.Time + Config.CoincidenceWindow);
+
+        histMulti->fill(HitsWithin.size());
 
         if (HitsWithin.size() > 2)
             groupEventsByAssembly(HitsWithin);
@@ -77,6 +88,12 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         //found a good coincidence!
         Pairs.push_back(CoincidencePair(thisHit, nextHit));
         iCurrentHit = iNextHit;
+    }
+
+    if (Config.FinderMethod == 2)
+    {
+        histMulti->report();
+        histMulti->save(Config.WorkingDirectory + "/CoincMultiplicity.txt");
     }
 
     out("Found", Pairs.size(), "coincidences");

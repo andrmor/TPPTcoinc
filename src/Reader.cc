@@ -34,7 +34,6 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
     if (Config.BinaryInput)
     {
         char ch;
-        double depo;
         while (inStream->get(ch))
         {
             if (inStream->eof()) break;
@@ -49,12 +48,12 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
                 inStream->read((char*)&hit.Time,   sizeof(double));
                 inStream->read((char*)&hit.Energy, sizeof(double));
 
-                if (bDebug) out("Extracted values:", hit.Time, depo);
+                if (bDebug) out("Extracted values:", hit.Time, hit.Energy);
 
                 if (bEnforceTimeEnergy)
                 {
-                    if (depo     < Config.EnergyFrom || depo     > Config.EnergyTo) continue;
-                    if (hit.Time < Config.TimeFrom   || hit.Time > Config.TimeTo)   continue;
+                    if (hit.Energy < Config.EnergyFrom || hit.Energy > Config.EnergyTo) continue;
+                    if (hit.Time   < Config.TimeFrom   || hit.Time   > Config.TimeTo)   continue;
                 }
 
                 Hits.push_back(hit);
@@ -85,7 +84,7 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
             {
                 //another node
                 ss >> time >> depo;
-                if (bDebug) out("Extracted values:", time, depo);
+                if (bDebug) out("Extracted time and depo values:", time, depo);
 
                 if (bEnforceTimeEnergy)
                 {
@@ -100,7 +99,7 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
     }
 
     inStream->close();
-    out("\n<-Read completed\n");
+    out("<-Read completed");
     out("Loaded",Hits.size(),"events");
 
     return "";

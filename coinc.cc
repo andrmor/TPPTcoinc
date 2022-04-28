@@ -50,19 +50,19 @@ int main(int argc, char** argv)
     {
         // --- Start of user inits ---
 
-        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/Na22";
+        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/Na22/AfterEnergyBlurAdded";
 
-        Config.InputFileName     = "BuilderOutput1e7a.bin"; Config.BinaryInput  = true;
+        Config.InputFileName     = "BuilderOutputTest.bin"; Config.BinaryInput  = true;
         //Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
         //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairs1e7a.txt";     Config.BinaryOutput = false;
+        Config.OutputFileName    = "CoincPairsTest.txt";     Config.BinaryOutput = false;
 
         Config.HeaderFileName    = "Header.hlm";
 
         Config.LutFileName       = "LUT.txt";
         Config.ExportLutFileName = "CrystalLUT.txt";
 
-        Config.FinderMethod      = 1;  // 1 - first implemented, no energy splitting allowed
+        Config.FinderMethod      = 2;  // 1 - first implemented, no energy splitting allowed
                                        // 2 - second one, energy is allowed to be split within the same assembly
         Config.RejectSameHead    = true;
 
@@ -94,6 +94,7 @@ int main(int argc, char** argv)
     out("-->Sorting hits");
     std::sort(Hits.begin(), Hits.end());
 
+    out("-->Finding coincidences");
     switch (Config.FinderMethod)
     {
     case 1:
