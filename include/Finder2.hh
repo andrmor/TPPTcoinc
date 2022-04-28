@@ -22,7 +22,8 @@ private:
     const std::vector<HitRecord> & Hits;
     const Lut                    & LUT;
 
-    Hist1D * histMulti = nullptr;
+    Hist1D * histScintMulti = nullptr;
+    Hist1D * histAssemblyMulti = nullptr;
 
     void groupEventsByAssembly(std::vector<HitRecord> & HitsWithin);
     bool isOutsideEnergyWindow(double energy) const;

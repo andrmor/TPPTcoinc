@@ -9,12 +9,14 @@
 Finder2::Finder2(std::vector<HitRecord> & hits, const Lut & lut) :
     Config(Configuration::getInstance()),  Hits(hits), LUT(lut)
 {
-    histMulti = new Hist1D(14, 1, 15);
+    histScintMulti    = new Hist1D(14, 1, 15);
+    histAssemblyMulti = new Hist1D(14, 1, 15);
 }
 
 Finder2::~Finder2()
 {
-    delete histMulti;
+    delete histScintMulti;
+    delete histAssemblyMulti;
 }
 
 void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
@@ -38,7 +40,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         {
             //large time gap, not interested in this hit
             numSingles++;
-            histMulti->fill(1.0);
+            histScintMulti->fill(1.0);
             continue;
         }
 
@@ -51,23 +53,26 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         }
         while (iNextHit < Hits.size() && Hits[iNextHit].Time < thisHit.Time + Config.CoincidenceWindow);
 
-        histMulti->fill(HitsWithin.size());
+        histScintMulti->fill(HitsWithin.size());
 
-        if (HitsWithin.size() > 2)
+        if (HitsWithin.size() > 1)
             groupEventsByAssembly(HitsWithin);
+        histAssemblyMulti->fill(HitsWithin.size());
 
-        if (HitsWithin.size() == 1)  // paranoic
+        if (HitsWithin.size() == 1)
         {
             numSingles++;
             iCurrentHit = iNextHit;
             continue;
         }
+        /*
         else if (HitsWithin.size() > 2)
         {
             numMulti++;
             iCurrentHit = iNextHit;
             continue;
         }
+        */
 
         // two hits in the vector
 
@@ -92,8 +97,10 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 
     if (Config.FinderMethod == 2)
     {
-        histMulti->report();
-        histMulti->save(Config.WorkingDirectory + "/CoincMultiplicity.txt");
+        histScintMulti->report();
+        histScintMulti->save(Config.WorkingDirectory + "/CoincScintMultiplicity.txt");
+        histAssemblyMulti->report();
+        histAssemblyMulti->save(Config.WorkingDirectory + "/CoincAssemblyMultiplicity.txt");
     }
 
     out("Found", Pairs.size(), "coincidences");

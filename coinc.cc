@@ -52,10 +52,10 @@ int main(int argc, char** argv)
 
         Config.WorkingDirectory  = "/home/andr/WORK/TPPT/Na22/AfterEnergyBlurAdded";
 
-        Config.InputFileName     = "BuilderOutputTest.bin"; Config.BinaryInput  = true;
+        Config.InputFileName     = "BuilderOutput1e6.bin"; Config.BinaryInput  = true;
         //Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
         //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairsTest.txt";     Config.BinaryOutput = false;
+        Config.OutputFileName    = "CoincPairs1e6.txt";     Config.BinaryOutput = false;
 
         Config.HeaderFileName    = "Header.hlm";
 
