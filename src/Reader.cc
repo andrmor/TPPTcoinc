@@ -24,7 +24,7 @@ Reader::Reader(bool EnforceTimeEnergy) :
         out("<-Open");
 }
 
-std::string Reader::read(std::vector<HitRecord> & Hits)
+std::string Reader::read(std::vector<EventRecord> & Hits)
 {
     if (!inStream) return "Cannot open input file";
 
@@ -44,7 +44,7 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
             }
             else if (ch == (char)0xFF)
             {
-                HitRecord hit(iScint, 0, 0);
+                EventRecord hit(iScint, 0, 0);
                 inStream->read((char*)&hit.Time,   sizeof(double));
                 inStream->read((char*)&hit.Energy, sizeof(double));
 
@@ -92,7 +92,7 @@ std::string Reader::read(std::vector<HitRecord> & Hits)
                     if (time < Config.TimeFrom   || time > Config.TimeTo)   continue;
                 }
 
-                Hits.push_back( HitRecord(iScint, time, depo) );
+                Hits.push_back( EventRecord(iScint, time, depo) );
                 if (bDebug) out("  Added to HitRecords");
             }
         }

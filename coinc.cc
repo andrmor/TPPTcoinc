@@ -13,16 +13,24 @@
 
 // Input file format:
 //
-// # iScint                     iScint is the scintillator's index
-// t1 e1                        t is the time of the hit [ns], e is the event energy [MeV]
+// # iScint                     iScint is the scintillator's index, typically starts with 0
+// t1 e1                        t is the event time [ns], e is the event energy [MeV]
 // t2 e2
 // ...
 // tn en
-// # ...                        next scintillator index
+// # iScint+1                   next scintillator index
+// t1 e1
+// t2 e2
+// ...
 
 //Output file format
 //
 // i1 i2 dt t1                    i1 and i2 are the scintullator's indexes, dt is delta time (t1 - t2) [ps], t1 is time in [ms]
+
+// incoming LUT format:
+// FacePosX FacePosY FacePosZ NormX NormY NormZ HeadNumber Angle AssemblyNumber
+// outgoing LUT format:
+// iScint,FacePosX,FacePosY,FacePosZ
 
 int main(int argc, char** argv)
 {
@@ -50,12 +58,12 @@ int main(int argc, char** argv)
     {
         // --- Start of user inits ---
 
-        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/Na22/AfterEnergyBlurAdded";
+        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/TestCoincData";
 
-        Config.InputFileName     = "BuilderOutput1e6.bin"; Config.BinaryInput  = true;
-        //Config.InputFileName     = "BuilderOutput.txt";  Config.BinaryInput = false;
+        //Config.InputFileName     = "BuilderOutput1e6.bin"; Config.BinaryInput  = true;
+        Config.InputFileName     = "in-multiGoodSplit.txt";  Config.BinaryInput = false;
         //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairs1e6.txt";     Config.BinaryOutput = false;
+        Config.OutputFileName    = "CoincPairs.txt";     Config.BinaryOutput = false;
 
         Config.HeaderFileName    = "Header.hlm";
 
@@ -64,7 +72,14 @@ int main(int argc, char** argv)
 
         Config.FinderMethod      = 2;  // 1 - first implemented, no energy splitting allowed
                                        // 2 - second one, energy is allowed to be split within the same assembly
+
+        Config.GroupByAssembly   = true; // only for FinderMethod=2
+
+        //Rejection config
         Config.RejectSameHead    = true;
+        Config.RejectMultiples   = true; // only for FinderMethod=2
+                                         // when active, when more than 2 events are within the window, reject: even if two are 511keV and the other are small energy
+                                         // events with three or more 511 keV are always rejected
 
         Config.CoincidenceWindow = 4.0;      // [ns]
 
@@ -79,7 +94,7 @@ int main(int argc, char** argv)
 
     Lut LUT(Config.WorkingDirectory + '/' + Config.LutFileName);
 
-    std::vector<HitRecord> Hits;
+    std::vector<EventRecord> Hits;
     std::vector<CoincidencePair> Pairs;
 
     const bool EnforceEnergyTimeInReader = (Config.FinderMethod == 1);

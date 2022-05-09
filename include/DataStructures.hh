@@ -9,12 +9,12 @@ struct ScintPosition
     double pos[3];
 };
 
-struct HitRecord
+struct EventRecord
 {
-    HitRecord(int scint, double time, double energy) : iScint(scint), Time(time), Energy(energy) {}
-    HitRecord(){}
+    EventRecord(int scint, double time, double energy) : iScint(scint), Time(time), Energy(energy) {}
+    EventRecord(){}
 
-    bool operator<(const HitRecord & other) const {return Time < other.Time;}
+    bool operator<(const EventRecord & other) const {return Time < other.Time;}
 
     int    iScint;
     double Time;
@@ -23,10 +23,10 @@ struct HitRecord
 
 struct CoincidencePair
 {
-    CoincidencePair(HitRecord Record1, HitRecord Record2) {Records[0] = Record1; Records[1] = Record2;}
+    CoincidencePair(EventRecord Record1, EventRecord Record2) {Records[0] = Record1; Records[1] = Record2;}
     CoincidencePair(){}
 
-    HitRecord Records[2];
+    EventRecord Records[2];
 };
 
 #endif // depositionnoderecord_h

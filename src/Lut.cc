@@ -65,8 +65,11 @@ int Lut::getAssemblyIndex(int iScint) const
     }
 }
 
+//static int iCounter = 0;
 bool Lut::isDifferentHeads(int iScint1, int iScint2) const
 {
+    //out(iScint1, iScint2, LUT[iScint1].HeadNumber, LUT[iScint2].HeadNumber, iCounter++);
+
     if (iScint1 >= 0 && iScint1 < LUT.size() &&
         iScint2 >= 0 && iScint2 < LUT.size())
             return ( LUT[iScint1].HeadNumber != LUT[iScint2].HeadNumber );

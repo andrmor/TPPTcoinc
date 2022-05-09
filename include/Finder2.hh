@@ -12,22 +12,23 @@ class Hist1D;
 class Finder2
 {
 public:
-    Finder2(std::vector<HitRecord> & hits, const Lut & lut);
+    Finder2(std::vector<EventRecord> & hits, const Lut & lut);
     ~Finder2();
 
     void findCoincidences(std::vector<CoincidencePair> & Pairs);
 
 private:
-    const Configuration          & Config;
-    const std::vector<HitRecord> & Hits;
-    const Lut                    & LUT;
+    const Configuration            & Config;
+    const std::vector<EventRecord> & Events;
+    const Lut                      & LUT;
 
-    Hist1D * histScintMulti = nullptr;
+    Hist1D * histScintMulti    = nullptr;
     Hist1D * histAssemblyMulti = nullptr;
 
-    void groupEventsByAssembly(std::vector<HitRecord> & HitsWithin);
+    void groupEventsByAssembly(std::vector<EventRecord> & EventsWithin);
+    void killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin);
     bool isOutsideEnergyWindow(double energy) const;
-    void mergeFirstToSecondRecord(const HitRecord & fromRecord, HitRecord & toRecord);
+    void mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord);
 
 };
 

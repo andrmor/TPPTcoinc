@@ -11,13 +11,13 @@ class Lut;
 class Finder1
 {
 public:
-    Finder1(std::vector<HitRecord> & hits, const Lut & lut);
+    Finder1(std::vector<EventRecord> & hits, const Lut & lut);
 
     void findCoincidences(std::vector<CoincidencePair> & Pairs);
 
 private:
     const Configuration    & Config;
-    std::vector<HitRecord> & Hits;
+    std::vector<EventRecord> & Hits;
     const Lut              & LUT;
 
     bool bDebug = false;

@@ -6,8 +6,8 @@
 
 #include <algorithm>
 
-Finder2::Finder2(std::vector<HitRecord> & hits, const Lut & lut) :
-    Config(Configuration::getInstance()),  Hits(hits), LUT(lut)
+Finder2::Finder2(std::vector<EventRecord> & hits, const Lut & lut) :
+    Config(Configuration::getInstance()),  Events(hits), LUT(lut)
 {
     histScintMulti    = new Hist1D(14, 1, 15);
     histAssemblyMulti = new Hist1D(14, 1, 15);
@@ -23,104 +23,111 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
     int numSingles = 0;
     int numMulti = 0;
+    int num3plus = 0;
     int numBadEnergy = 0;
     int numSameHead = 0;
 
-    std::vector<HitRecord> HitsWithin;
+    std::vector<EventRecord> EventsWithin;
 
-    for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
+    for (int iCurrentEvent = 0; iCurrentEvent < (int)Events.size() - 1; iCurrentEvent++)
     {
-        const HitRecord & thisHit = Hits[iCurrentHit];
-        //out(iCurrentHit, "-->", thisHit.iScint, thisHit.Time);
+        const EventRecord & thisEvent = Events[iCurrentEvent];
 
-        int iNextHit = iCurrentHit + 1;
-        const HitRecord & nextHit = Hits[iNextHit];
+        int iNextEvent = iCurrentEvent + 1;
+        const EventRecord & nextEvent = Events[iNextEvent];
 
-        if (nextHit.Time > thisHit.Time + Config.CoincidenceWindow)
+        if (nextEvent.Time > thisEvent.Time + Config.CoincidenceWindow)
         {
-            //large time gap, not interested in this hit
             numSingles++;
             histScintMulti->fill(1.0);
             continue;
         }
 
-        HitsWithin.clear();
-        HitsWithin.push_back(Hits[iCurrentHit]);
+        EventsWithin.clear();
+        EventsWithin.push_back(Events[iCurrentEvent]);
         do
         {
-            HitsWithin.push_back(Hits[iNextHit]);
-            iNextHit++;
+            EventsWithin.push_back(Events[iNextEvent]);
+            iNextEvent++;
         }
-        while (iNextHit < Hits.size() && Hits[iNextHit].Time < thisHit.Time + Config.CoincidenceWindow);
+        while (iNextEvent < Events.size() && Events[iNextEvent].Time < thisEvent.Time + Config.CoincidenceWindow);
+        histScintMulti->fill(EventsWithin.size());
 
-        histScintMulti->fill(HitsWithin.size());
+        if (Config.GroupByAssembly)
+        {
+            if (EventsWithin.size() > 1) groupEventsByAssembly(EventsWithin);
+            histAssemblyMulti->fill(EventsWithin.size());
+        }
 
-        if (HitsWithin.size() > 1)
-            groupEventsByAssembly(HitsWithin);
-        histAssemblyMulti->fill(HitsWithin.size());
-
-        if (HitsWithin.size() == 1)
+        if (EventsWithin.size() == 1)
         {
             numSingles++;
-            iCurrentHit = iNextHit;
+            iCurrentEvent = iNextEvent;
             continue;
         }
-        /*
-        else if (HitsWithin.size() > 2)
+        if (EventsWithin.size() > 2 && Config.RejectMultiples)
         {
             numMulti++;
-            iCurrentHit = iNextHit;
+            iCurrentEvent = iNextEvent;
             continue;
         }
-        */
 
-        // two hits in the vector
-
-        if (isOutsideEnergyWindow(HitsWithin.front().Energy) || isOutsideEnergyWindow(HitsWithin.back().Energy))
+        killOutsideEnergyWinow(EventsWithin);
+        if (EventsWithin.size() == 1)
         {
             numBadEnergy++;
-            iCurrentHit = iNextHit;
+            iCurrentEvent = iNextEvent;
+            continue;
+        }
+        if (EventsWithin.size() > 2)
+        {
+            num3plus++;
+            iCurrentEvent = iNextEvent;
             continue;
         }
 
-        if (Config.RejectSameHead && LUT.isDifferentHeads(HitsWithin.front().iScint, HitsWithin.back().iScint))
+        // two events of 511 keV in the vector
+
+        if (Config.RejectSameHead && !LUT.isDifferentHeads(EventsWithin.front().iScint, EventsWithin.back().iScint))
         {
             numSameHead++;
-            iCurrentHit = iNextHit;
+            iCurrentEvent = iNextEvent;
             continue;
         }
 
         //found a good coincidence!
-        Pairs.push_back(CoincidencePair(thisHit, nextHit));
-        iCurrentHit = iNextHit;
+        Pairs.push_back(CoincidencePair(thisEvent, nextEvent));
+        iCurrentEvent = iNextEvent;
     }
 
     if (Config.FinderMethod == 2)
     {
         histScintMulti->report();
         histScintMulti->save(Config.WorkingDirectory + "/CoincScintMultiplicity.txt");
-        histAssemblyMulti->report();
+
+        if (Config.GroupByAssembly) histAssemblyMulti->report();
         histAssemblyMulti->save(Config.WorkingDirectory + "/CoincAssemblyMultiplicity.txt");
     }
 
     out("Found", Pairs.size(), "coincidences");
     out("  Num singles:", numSingles);
-    out("  Num multiples:", numMulti);
+    if (Config.RejectMultiples) out("  Num multiples:", numMulti);
+    else                        out("  Num 3+ 511 keV:", num3plus);
     out("  Num bad energy:", numBadEnergy);
     if (Config.RejectSameHead) out("  Num rejected based on detector head:", numSameHead);
 }
 
-void Finder2::groupEventsByAssembly(std::vector<HitRecord> & HitsWithin)
+void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
 {
-    for (size_t iThis = HitsWithin.size()-1; iThis > 1; iThis--)
+    for (int iThis = (int)EventsWithin.size()-1; iThis > 0; iThis--)
     {
-        const HitRecord & ThisRecord = HitsWithin[iThis];
+        const EventRecord & ThisRecord = EventsWithin[iThis];
         const int thisAssembly = LUT.getAssemblyIndex(ThisRecord.iScint);
 
         bool bMerged = false;
-        for (size_t iTester = 0; iTester < iThis; iTester++)
+        for (int iTester = 0; iTester < iThis; iTester++)
         {
-            HitRecord & TestRecord = HitsWithin[iTester];
+            EventRecord & TestRecord = EventsWithin[iTester];
             if ( thisAssembly != LUT.getAssemblyIndex(TestRecord.iScint) ) continue;
 
             mergeFirstToSecondRecord(ThisRecord, TestRecord);
@@ -128,7 +135,16 @@ void Finder2::groupEventsByAssembly(std::vector<HitRecord> & HitsWithin)
             break;
         }
 
-        if (bMerged) HitsWithin.erase(HitsWithin.begin() + iThis);
+        if (bMerged) EventsWithin.erase(EventsWithin.begin() + iThis);
+    }
+}
+
+void Finder2::killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin)
+{
+    for (int iEvent = (int)EventsWithin.size()-1; iEvent >= 0; iEvent--)
+    {
+        if ( isOutsideEnergyWindow(EventsWithin[iEvent].Energy) )
+            EventsWithin.erase(EventsWithin.begin() + iEvent);
     }
 }
 
@@ -137,7 +153,7 @@ bool Finder2::isOutsideEnergyWindow(double energy) const
     return (energy < Config.EnergyFrom || energy > Config.EnergyTo);
 }
 
-void Finder2::mergeFirstToSecondRecord(const HitRecord & fromRecord, HitRecord & toRecord)
+void Finder2::mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord)
 {
     toRecord.Time = std::min(fromRecord.Time, toRecord.Time);
     toRecord.iScint = (toRecord.Energy < fromRecord.Energy ? toRecord.iScint

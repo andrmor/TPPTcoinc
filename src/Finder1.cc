@@ -3,7 +3,7 @@
 #include "Lut.hh"
 #include "out.hh"
 
-Finder1::Finder1(std::vector<HitRecord> & hits, const Lut & lut) :
+Finder1::Finder1(std::vector<EventRecord> & hits, const Lut & lut) :
     Config(Configuration::getInstance()),  Hits(hits), LUT(lut) {}
 
 void Finder1::findCoincidences(std::vector<CoincidencePair> & Pairs)
@@ -13,11 +13,11 @@ void Finder1::findCoincidences(std::vector<CoincidencePair> & Pairs)
 
     for (int iCurrentHit = 0; iCurrentHit < Hits.size() - 1; iCurrentHit++)
     {
-        const HitRecord & thisHit = Hits[iCurrentHit];
+        const EventRecord & thisHit = Hits[iCurrentHit];
         //out(iCurrentHit, "-->", thisHit.iScint, thisHit.Time);
 
         int iNextHit = iCurrentHit + 1;
-        const HitRecord & nextHit = Hits[iNextHit];
+        const EventRecord & nextHit = Hits[iNextHit];
 
         if (nextHit.Time > thisHit.Time + Config.CoincidenceWindow)
         {

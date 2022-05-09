@@ -13,7 +13,7 @@ class Reader
 public:
     Reader(bool EnforceTimeEnergy);
 
-    std::string read(std::vector<HitRecord> & Hits); // returns error string, empty if success
+    std::string read(std::vector<EventRecord> & Hits); // returns error string, empty if success
 
 private:
     const Configuration & Config;

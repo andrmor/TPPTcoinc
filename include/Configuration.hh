@@ -35,7 +35,11 @@ public:
     std::string ExportLutFileName  = "CrystalLUT.txt";
 
     int    FinderMethod      = 1;
+
+    bool   GroupByAssembly   = true;
+
     bool   RejectSameHead    = true;
+    bool   RejectMultiples   = false;
 
     double CoincidenceWindow = 4.0; // [ns]
 

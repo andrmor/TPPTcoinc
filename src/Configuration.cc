@@ -30,7 +30,11 @@ void Configuration::saveConfig(const std::string & fileName) const
     json["ExportLutFileName"] = ExportLutFileName;
 
     json["FinderMethod"]      = FinderMethod;
+
+    json["GroupByAssembly"]      = GroupByAssembly;
+
     json["RejectSameHead"]    = RejectSameHead;
+    json["RejectMultiples"]   = RejectMultiples;
 
     json["CoincidenceWindow"] = CoincidenceWindow;
 
@@ -91,7 +95,11 @@ void Configuration::loadConfig(const std::string & fileName)
     jstools::readString(json, "ExportLutFileName", ExportLutFileName);
 
     jstools::readInt   (json, "FinderMethod",      FinderMethod);
+
+    jstools::readBool  (json, "GroupByAssembly",   GroupByAssembly);
+
     jstools::readBool  (json, "RejectSameHead",    RejectSameHead);
+    jstools::readBool  (json, "RejectMultiples",   RejectMultiples);
 
     jstools::readDouble(json, "CoincidenceWindow", CoincidenceWindow);
 
