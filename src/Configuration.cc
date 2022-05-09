@@ -31,7 +31,8 @@ void Configuration::saveConfig(const std::string & fileName) const
 
     json["FinderMethod"]      = FinderMethod;
 
-    json["GroupByAssembly"]      = GroupByAssembly;
+    json["GroupByAssembly"]   = GroupByAssembly;
+    json["GroupingTime"]      = GroupingTime;
 
     json["RejectSameHead"]    = RejectSameHead;
     json["RejectMultiples"]   = RejectMultiples;
@@ -97,6 +98,7 @@ void Configuration::loadConfig(const std::string & fileName)
     jstools::readInt   (json, "FinderMethod",      FinderMethod);
 
     jstools::readBool  (json, "GroupByAssembly",   GroupByAssembly);
+    jstools::readBool  (json, "GroupingTime",      GroupingTime);
 
     jstools::readBool  (json, "RejectSameHead",    RejectSameHead);
     jstools::readBool  (json, "RejectMultiples",   RejectMultiples);

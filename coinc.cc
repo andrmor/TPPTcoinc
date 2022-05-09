@@ -75,6 +75,9 @@ int main(int argc, char** argv)
 
         Config.GroupByAssembly   = true; // only for FinderMethod=2
 
+        Config.GroupingTime      = 100.0; // only for FinderMethod=3
+                                          // in ns
+
         //Rejection config
         Config.RejectSameHead    = true;
         Config.RejectMultiples   = true; // only for FinderMethod=2
@@ -94,33 +97,33 @@ int main(int argc, char** argv)
 
     Lut LUT(Config.WorkingDirectory + '/' + Config.LutFileName);
 
-    std::vector<EventRecord> Hits;
+    std::vector<EventRecord>     Events;
     std::vector<CoincidencePair> Pairs;
 
     const bool EnforceEnergyTimeInReader = (Config.FinderMethod == 1);
     Reader reader(EnforceEnergyTimeInReader);
-    std::string error = reader.read(Hits);
+    std::string error = reader.read(Events);
     if (!error.empty())
     {
         out(error);
         exit(2);
     }
 
-    out("-->Sorting hits");
-    std::sort(Hits.begin(), Hits.end());
+    out("-->Sorting events");
+    std::sort(Events.begin(), Events.end());
 
     out("-->Finding coincidences");
     switch (Config.FinderMethod)
     {
     case 1:
         {
-            Finder1 cf(Hits, LUT);
+            Finder1 cf(Events, LUT);
             cf.findCoincidences(Pairs);
         }
         break;
     case 2:
         {
-            Finder2 cf(Hits, LUT);
+            Finder2 cf(Events, LUT);
             cf.findCoincidences(Pairs);
         }
         break;

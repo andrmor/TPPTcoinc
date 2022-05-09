@@ -38,6 +38,8 @@ public:
 
     bool   GroupByAssembly   = true;
 
+    bool   GroupingTime      = 100.0; // [ns]
+
     bool   RejectSameHead    = true;
     bool   RejectMultiples   = false;
 

@@ -1,4 +1,4 @@
-#include "Finder2.hh"
+#include "Finder3.hh"
 #include "Configuration.hh"
 #include "Lut.hh"
 #include "out.hh"
@@ -6,21 +6,23 @@
 
 #include <algorithm>
 
-Finder2::Finder2(std::vector<EventRecord> & hits, const Lut & lut) :
+Finder3::Finder3(std::vector<EventRecord> & hits, const Lut & lut) :
     Config(Configuration::getInstance()),  Events(hits), LUT(lut)
 {
     histScintMulti    = new Hist1D(14, 1, 15);
     histAssemblyMulti = new Hist1D(14, 1, 15);
 }
 
-Finder2::~Finder2()
+Finder3::~Finder3()
 {
     delete histScintMulti;
     delete histAssemblyMulti;
 }
 
-void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
+void Finder3::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
+    if (Events.size() < 2) return;
+
     int numSingles = 0;
     int numMulti = 0;
     int num3plus = 0;
@@ -29,46 +31,34 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 
     std::vector<EventRecord> EventsWithin;
 
-    for (int iCurrentEvent = 0; iCurrentEvent < (int)Events.size() - 1; iCurrentEvent++)
+    double TimeGroupStop = Events[0].Time + Config.GroupingTime;
+
+    size_t iEvent = 0;
+    do
     {
-        const EventRecord & thisEvent = Events[iCurrentEvent];
-
-        int iNextEvent = iCurrentEvent + 1;
-        const EventRecord & nextEvent = Events[iNextEvent];
-
-        if (nextEvent.Time > thisEvent.Time + Config.CoincidenceWindow)
-        {
-            numSingles++;
-            histScintMulti->fill(1.0);
-            continue;
-        }
-
         EventsWithin.clear();
-        EventsWithin.push_back(Events[iCurrentEvent]);
-        do
+        for (; iEvent < Events.size(); iEvent++)
         {
-            EventsWithin.push_back(Events[iNextEvent]);
-            iNextEvent++;
+            if (Events[iEvent].Time > TimeGroupStop) break;
+            EventsWithin.push_back(Events[iEvent]);
         }
-        while (iNextEvent < Events.size() && Events[iNextEvent].Time < thisEvent.Time + Config.CoincidenceWindow);
-        histScintMulti->fill(EventsWithin.size());
 
+        TimeGroupStop += Config.GroupingTime;
+
+        // ---
+
+        histScintMulti->fill(EventsWithin.size());
         if (Config.GroupByAssembly)
         {
             if (EventsWithin.size() > 1) groupEventsByAssembly(EventsWithin);
             histAssemblyMulti->fill(EventsWithin.size());
         }
 
+
+        if (EventsWithin.empty()) continue;
         if (EventsWithin.size() == 1)
         {
             numSingles++;
-            iCurrentEvent = iNextEvent;
-            continue;
-        }
-        if (EventsWithin.size() > 2 && Config.RejectMultiples)
-        {
-            numMulti++;
-            iCurrentEvent = iNextEvent;
             continue;
         }
 
@@ -76,13 +66,11 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         if (EventsWithin.size() == 1)
         {
             numBadEnergy++;
-            iCurrentEvent = iNextEvent;
             continue;
         }
         if (EventsWithin.size() > 2)
         {
             num3plus++;
-            iCurrentEvent = iNextEvent;
             continue;
         }
 
@@ -91,21 +79,21 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         if (Config.RejectSameHead && !LUT.isDifferentHeads(EventsWithin.front().iScint, EventsWithin.back().iScint))
         {
             numSameHead++;
-            iCurrentEvent = iNextEvent;
             continue;
         }
 
         //found a good coincidence!
-        Pairs.push_back(CoincidencePair(thisEvent, nextEvent));
-        iCurrentEvent = iNextEvent;
-    }
+        Pairs.push_back(CoincidencePair(EventsWithin.front(), EventsWithin.back()));
 
+        // ---
+    }
+    while (iEvent < Events.size());
 
     histScintMulti->report();
-    histScintMulti->save(Config.WorkingDirectory + "/CoincScintMultiplicity2.txt");
+    histScintMulti->save(Config.WorkingDirectory + "/CoincScintMultiplicity3.txt");
 
     if (Config.GroupByAssembly) histAssemblyMulti->report();
-    histAssemblyMulti->save(Config.WorkingDirectory + "/CoincAssemblyMultiplicity2.txt");
+    histAssemblyMulti->save(Config.WorkingDirectory + "/CoincAssemblyMultiplicity3.txt");
 
     out("Found", Pairs.size(), "coincidences");
     out("  Num singles:", numSingles);
@@ -115,7 +103,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
     if (Config.RejectSameHead) out("  Num rejected based on detector head:", numSameHead);
 }
 
-void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
+void Finder3::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
 {
     for (int iThis = (int)EventsWithin.size()-1; iThis > 0; iThis--)
     {
@@ -137,7 +125,7 @@ void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
     }
 }
 
-void Finder2::killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin)
+void Finder3::killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin)
 {
     for (int iEvent = (int)EventsWithin.size()-1; iEvent >= 0; iEvent--)
     {
@@ -146,12 +134,12 @@ void Finder2::killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin)
     }
 }
 
-bool Finder2::isOutsideEnergyWindow(double energy) const
+bool Finder3::isOutsideEnergyWindow(double energy) const
 {
     return (energy < Config.EnergyFrom || energy > Config.EnergyTo);
 }
 
-void Finder2::mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord)
+void Finder3::mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord)
 {
     toRecord.Time = std::min(fromRecord.Time, toRecord.Time);
     toRecord.iScint = (toRecord.Energy > fromRecord.Energy ? toRecord.iScint
