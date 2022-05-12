@@ -70,19 +70,14 @@ int main(int argc, char** argv)
         Config.LutFileName       = "LUT.txt";
         Config.ExportLutFileName = "CrystalLUT.txt";
 
-        Config.FinderMethod      = 2;  // 1 - first implemented, no energy splitting allowed
+        Config.FinderMethod      = 2;  // 1 - first implemented, no energy splitting allowed, strict multiple rejection
                                        // 2 - second one, energy is allowed to be split within the same assembly
 
         Config.GroupByAssembly   = true; // only for FinderMethod=2
 
-        Config.GroupingTime      = 100.0; // only for FinderMethod=3
-                                          // in ns
-
         //Rejection config
         Config.RejectSameHead    = true;
-        Config.RejectMultiples   = true; // only for FinderMethod=2
-                                         // when active, when more than 2 events are within the window, reject: even if two are 511keV and the other are small energy
-                                         // events with three or more 511 keV are always rejected
+        Config.RejectMultiples   = Configuration::None; // only for FinderMethod=2
 
         Config.CoincidenceWindow = 4.0;      // [ns]
 

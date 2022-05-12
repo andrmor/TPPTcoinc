@@ -1,6 +1,8 @@
 #ifndef depositionnoderecord_h
 #define depositionnoderecord_h
 
+#include "out.hh"
+
 struct ScintPosition
 {
     ScintPosition(double x, double y, double z) {pos[0] = x; pos[1] = y; pos[2] = z;}
@@ -15,6 +17,8 @@ struct EventRecord
     EventRecord(){}
 
     bool operator<(const EventRecord & other) const {return Time < other.Time;}
+
+    void print() {out("iScint:", iScint, " Energy:", Energy, " Time:", Time);}
 
     int    iScint;
     double Time;

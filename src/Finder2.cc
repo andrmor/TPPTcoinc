@@ -22,8 +22,10 @@ Finder2::~Finder2()
 void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 {
     int numSingles = 0;
+    int numSinglesAfterAM = 0; // after assembly merging
     int numMulti = 0;
-    int num3plus = 0;
+    int numMultiThree511OrMore = 0;
+    int numMultiPassed = 0;
     int numBadEnergy = 0;
     int numSameHead = 0;
 
@@ -44,7 +46,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         }
 
         EventsWithin.clear();
-        EventsWithin.push_back(Events[iCurrentEvent]);
+        EventsWithin.push_back(thisEvent);
         do
         {
             EventsWithin.push_back(Events[iNextEvent]);
@@ -57,15 +59,16 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         {
             if (EventsWithin.size() > 1) groupEventsByAssembly(EventsWithin);
             histAssemblyMulti->fill(EventsWithin.size());
+
+            if (EventsWithin.size() == 1)
+            {
+                numSinglesAfterAM++;
+                iCurrentEvent = iNextEvent;
+                continue;
+            }
         }
 
-        if (EventsWithin.size() == 1)
-        {
-            numSingles++;
-            iCurrentEvent = iNextEvent;
-            continue;
-        }
-        if (EventsWithin.size() > 2 && Config.RejectMultiples)
+        if (EventsWithin.size() > 2 && Config.RejectMultiples == Configuration::All)
         {
             numMulti++;
             iCurrentEvent = iNextEvent;
@@ -81,22 +84,31 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         }
         if (EventsWithin.size() > 2)
         {
-            num3plus++;
-            iCurrentEvent = iNextEvent;
-            continue;
+            numMultiThree511OrMore++;
+            if (Config.RejectMultiples == Configuration::EnergyWindow)
+            {
+                iCurrentEvent = iNextEvent;
+                continue;
+            }
         }
 
-        // two events of 511 keV in the vector
+        // could be more than two events, sorting them by energy (largest will be first)
+        std::sort(EventsWithin.begin(), EventsWithin.end(),
+                  [](const EventRecord & r1, const EventRecord & r2)
+                  { return r1.Energy < r2.Energy; });
+        for (auto & r : EventsWithin) r.print();
 
-        if (Config.RejectSameHead && !LUT.isDifferentHeads(EventsWithin.front().iScint, EventsWithin.back().iScint))
-        {
-            numSameHead++;
-            iCurrentEvent = iNextEvent;
-            continue;
-        }
+        if (Config.RejectSameHead)
+            if (!LUT.isDifferentHeads(EventsWithin[0].iScint, EventsWithin[1].iScint))
+            {
+                numSameHead++;
+                iCurrentEvent = iNextEvent;
+                continue;
+            }
 
         //found a good coincidence!
-        Pairs.push_back(CoincidencePair(thisEvent, nextEvent));
+        Pairs.push_back(CoincidencePair(EventsWithin[0], EventsWithin[1]));
+        if (EventsWithin.size() > 2) numMultiPassed++;
         iCurrentEvent = iNextEvent;
     }
 
@@ -107,12 +119,16 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
     if (Config.GroupByAssembly) histAssemblyMulti->report();
     histAssemblyMulti->save(Config.WorkingDirectory + "/CoincAssemblyMultiplicity2.txt");
 
-    out("Found", Pairs.size(), "coincidences");
+    out("\n\nFound", Pairs.size(), "coincidences");
     out("  Num singles:", numSingles);
-    if (Config.RejectMultiples) out("  Num multiples:", numMulti);
-    else                        out("  Num 3+ 511 keV:", num3plus);
+    if (Config.GroupByAssembly) out("  Num singles after assembly merging:", numSinglesAfterAM);
+    if (Config.RejectMultiples == Configuration::All)
+        out("  Rejected all multiples:", numMulti);
+    if (Config.RejectMultiples == Configuration::EnergyWindow)
+        out("  Rejected multiples within the energy window:", numMultiThree511OrMore);
     out("  Num bad energy:", numBadEnergy);
     if (Config.RejectSameHead) out("  Num rejected based on detector head:", numSameHead);
+    out("  Multiples passed all filters:", numMultiPassed);
 }
 
 void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
@@ -153,8 +169,8 @@ bool Finder2::isOutsideEnergyWindow(double energy) const
 
 void Finder2::mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord)
 {
-    toRecord.Time = std::min(fromRecord.Time, toRecord.Time);
-    toRecord.iScint = (toRecord.Energy > fromRecord.Energy ? toRecord.iScint
+    toRecord.Time = std::min(fromRecord.Time, toRecord.Time);                     // !!!*** is it the best possible option?
+    toRecord.iScint = (toRecord.Energy > fromRecord.Energy ? toRecord.iScint      // scint with max energy
                                                            : fromRecord.iScint);
     toRecord.Energy += fromRecord.Energy;
 }

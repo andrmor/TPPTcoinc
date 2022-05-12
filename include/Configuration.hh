@@ -34,14 +34,16 @@ public:
     std::string LutFileName        = "LUT.txt";
     std::string ExportLutFileName  = "CrystalLUT.txt";
 
-    int    FinderMethod      = 1;
+    int    FinderMethod      = 2;
 
     bool   GroupByAssembly   = true;
 
-    bool   GroupingTime      = 100.0; // [ns]
-
     bool   RejectSameHead    = true;
-    bool   RejectMultiples   = false;
+
+    enum EMultiRejection {None, All, EnergyWindow}; // None        - multiples are allowed, the coincidence pair takes two strongest depositions
+                                                    // All         - all coincidences with the multiplicities larger than two are discarded
+                                                    // EnergyWndow - multiple coincidence is discarded only if there are more than two energy-accepted depositions
+    EMultiRejection RejectMultiples = None;
 
     double CoincidenceWindow = 4.0; // [ns]
 

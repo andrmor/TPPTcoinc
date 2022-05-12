@@ -32,10 +32,9 @@ void Configuration::saveConfig(const std::string & fileName) const
     json["FinderMethod"]      = FinderMethod;
 
     json["GroupByAssembly"]   = GroupByAssembly;
-    json["GroupingTime"]      = GroupingTime;
 
     json["RejectSameHead"]    = RejectSameHead;
-    json["RejectMultiples"]   = RejectMultiples;
+    json["RejectMultiples"]   = static_cast<int>(RejectMultiples);
 
     json["CoincidenceWindow"] = CoincidenceWindow;
 
@@ -98,10 +97,19 @@ void Configuration::loadConfig(const std::string & fileName)
     jstools::readInt   (json, "FinderMethod",      FinderMethod);
 
     jstools::readBool  (json, "GroupByAssembly",   GroupByAssembly);
-    jstools::readBool  (json, "GroupingTime",      GroupingTime);
 
     jstools::readBool  (json, "RejectSameHead",    RejectSameHead);
-    jstools::readBool  (json, "RejectMultiples",   RejectMultiples);
+    int iTmp = 666;
+    jstools::readInt  (json, "RejectMultiples",   iTmp);
+    switch (iTmp)
+    {
+    case 0: RejectMultiples = None;          break;
+    case 1: RejectMultiples = All;           break;
+    case 2: RejectMultiples = EnergyWindow;  break;
+    default:
+        out("Unknown multiple rejection mode!");
+        exit(13);
+    }
 
     jstools::readDouble(json, "CoincidenceWindow", CoincidenceWindow);
 
