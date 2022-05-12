@@ -95,8 +95,8 @@ int main(int argc, char** argv)
     std::vector<EventRecord>     Events;
     std::vector<CoincidencePair> Pairs;
 
-    const bool EnforceEnergyTimeInReader = (Config.FinderMethod == 1);
-    Reader reader(EnforceEnergyTimeInReader);
+    const bool EnforceEnergyInReader = (Config.FinderMethod == 1);
+    Reader reader(EnforceEnergyInReader);
     std::string error = reader.read(Events);
     if (!error.empty())
     {

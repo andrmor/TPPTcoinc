@@ -11,7 +11,7 @@ class Configuration;
 class Reader
 {
 public:
-    Reader(bool EnforceTimeEnergy);
+    Reader(bool EnforceEnergyRange);
 
     std::string read(std::vector<EventRecord> & Hits); // returns error string, empty if success
 
@@ -20,7 +20,7 @@ private:
 
     std::ifstream * inStream = nullptr;
 
-    bool bEnforceTimeEnergy = true;
+    bool bEnforceEnergyRange = true;
     bool bDebug = false;
 };
 

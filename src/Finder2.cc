@@ -80,7 +80,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         }
 
         bool bWasMultiBeforeEnergyFilter = (EventsWithin.size() > 2);
-        out("->->-->->", EventsWithin.size());
+        //out("->->-->->", EventsWithin.size());
         killOutsideEnergyWinow(EventsWithin);
         if (EventsWithin.size() < 2)
         {
@@ -102,7 +102,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         std::sort(EventsWithin.begin(), EventsWithin.end(),
                   [](const EventRecord & r1, const EventRecord & r2)
                   { return r1.Energy > r2.Energy; });
-        for (auto & r : EventsWithin) r.print();
+        //for (auto & r : EventsWithin) r.print();
 
         if (Config.RejectSameHead)
             if (!LUT.isDifferentHeads(EventsWithin[0].iScint, EventsWithin[1].iScint))

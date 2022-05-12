@@ -5,8 +5,8 @@
 #include <fstream>
 #include <sstream>
 
-Reader::Reader(bool EnforceTimeEnergy) :
-    Config(Configuration::getInstance()), bEnforceTimeEnergy(EnforceTimeEnergy)
+Reader::Reader(bool EnforceEnergyRange) :
+    Config(Configuration::getInstance()), bEnforceEnergyRange(EnforceEnergyRange)
 {
     std::string FileName = Config.WorkingDirectory + '/' + Config.InputFileName;
     out("Input file:", FileName);
@@ -50,11 +50,9 @@ std::string Reader::read(std::vector<EventRecord> & Hits)
 
                 if (bDebug) out("Extracted values:", hit.Time, hit.Energy);
 
-                if (bEnforceTimeEnergy)
-                {
+                if (hit.Time < Config.TimeFrom || hit.Time > Config.TimeTo) continue;
+                if (bEnforceEnergyRange)
                     if (hit.Energy < Config.EnergyFrom || hit.Energy > Config.EnergyTo) continue;
-                    if (hit.Time   < Config.TimeFrom   || hit.Time   > Config.TimeTo)   continue;
-                }
 
                 Hits.push_back(hit);
             }
@@ -86,11 +84,9 @@ std::string Reader::read(std::vector<EventRecord> & Hits)
                 ss >> time >> depo;
                 if (bDebug) out("Extracted time and depo values:", time, depo);
 
-                if (bEnforceTimeEnergy)
-                {
+                if (time < Config.TimeFrom || time > Config.TimeTo) continue;
+                if (bEnforceEnergyRange)
                     if (depo < Config.EnergyFrom || depo > Config.EnergyTo) continue;
-                    if (time < Config.TimeFrom   || time > Config.TimeTo)   continue;
-                }
 
                 Hits.push_back( EventRecord(iScint, time, depo) );
                 if (bDebug) out("  Added to HitRecords");
