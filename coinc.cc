@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
         //Rejection config
         Config.RejectSameHead    = true;
-        Config.RejectMultiples   = Configuration::None; // only for FinderMethod=2
+        Config.RejectMultiples   = Configuration::EnergyWindow; // only for FinderMethod=2  possible choices:  None, All, EnergyWindow
 
         Config.CoincidenceWindow = 4.0;      // [ns]
 
