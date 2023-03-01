@@ -1,4 +1,5 @@
 #include "Finder2.hh"
+#include "Enums.hh"
 #include "Configuration.hh"
 #include "Lut.hh"
 #include "out.hh"
@@ -72,7 +73,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         if (EventsWithin.size() > 2)
         {
             numMulti++;
-            if (Config.RejectMultiples == Configuration::All)
+            if (Config.RejectMultiples == RejectionMethods::All)
             {
                 iCurrentEvent = iNextEvent;
                 continue;
@@ -91,7 +92,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         if (EventsWithin.size() > 2)
         {
             numMultiThree511OrMore++;
-            if (Config.RejectMultiples == Configuration::EnergyWindow)
+            if (Config.RejectMultiples == RejectionMethods::EnergyWindow)
             {
                 iCurrentEvent = iNextEvent;
                 continue;
@@ -130,8 +131,8 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
     out("  Num singles:", numSingles);
     if (Config.GroupByAssembly) out("  Num singles after assembly merging:", numSinglesAfterAM);
     //if (Config.RejectMultiples == Configuration::All)
-    out("  Found multiples:", numMulti, (Config.RejectMultiples == Configuration::None ? " - not restricting" : (Config.RejectMultiples == Configuration::All ? " - killed all" : " - filter dependes on energy") ));
-    if (Config.RejectMultiples == Configuration::EnergyWindow)
+    out("  Found multiples:", numMulti, (Config.RejectMultiples == RejectionMethods::None ? " - not restricting" : (Config.RejectMultiples == RejectionMethods::All ? " - killed all" : " - filter dependes on energy") ));
+    if (Config.RejectMultiples == RejectionMethods::EnergyWindow)
         out("  Rejected multiples within the energy window:", numMultiThree511OrMore);
     out("  Num bad energy:", numBadEnergy);
     if (Config.RejectSameHead) out("  Num rejected based on detector head:", numSameHead);

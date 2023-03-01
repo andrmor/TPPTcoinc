@@ -1,4 +1,5 @@
 ﻿#include "DataStructures.hh"
+#include "Enums.hh"
 #include "Lut.hh"
 #include "Reader.hh"
 #include "Finder1.hh"
@@ -44,12 +45,6 @@ int main(int argc, char** argv)
     }
     else out("\nNo config file provided as argument, using configuration defined in the main of the coinc");
 
-        // warning: automatically saves config (if no errors) in working directory as CoincConfig.json
-        // beware of possible overright!
-
-        //here you can directly provide the config file name
-    //filename = "/home/andr/WORK/TPPT/CoincConfig1.json";
-
     if (!filename.empty())
     {
         Config.loadConfig(filename);
@@ -58,27 +53,32 @@ int main(int argc, char** argv)
     {
         // --- Start of user inits ---
 
-        Config.WorkingDirectory  = "/home/andr/WORK/TPPT/TestCoincData";
+        Config.WorkingDirectory  = "/home/andr/WORK/tmp";
 
+        // input
         //Config.InputFileName     = "BuilderOutput1e6.bin"; Config.BinaryInput  = true;
-        Config.InputFileName     = "in-multiGoodSplit.txt";  Config.BinaryInput = false;
-        //Config.OutputFileName    = "CoincPairs.bin";     Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairs.txt";     Config.BinaryOutput = false;
-
-        Config.HeaderFileName    = "Header.hlm";
-
+        Config.InputFileName     = "BuilderOutput2e8.txt"; Config.BinaryInput = false;
         Config.LutFileName       = "LUT.txt";
+
+        // output
+        //Config.OutputFileName    = "CoincPairs.bin"; Config.BinaryOutput = true;
+        Config.OutputFileName    = "CoincPairsLineY2e8.txt"; Config.BinaryOutput = false;
+        Config.HeaderFileName    = "Header.hlm";
         Config.ExportLutFileName = "CrystalLUT.txt";
 
-        Config.FinderMethod      = 2;  // 1 - first implemented, no energy splitting allowed, strict multiple rejection
-                                       // 2 - second one, energy is allowed to be split within the same assembly
+        // finder
+        Config.FinderMethod      = FinderMethods::Basic;
+            // Basic    - no energy splitting allowed, strict multiple rejection
+            // Advanced - energy is allowed to be split within the same assembly, flexible multiple rejection
 
-        Config.GroupByAssembly   = true; // only for FinderMethod=2
+        // next two settings have effect only if "Advanced" FinderMethod is selected
+            Config.GroupByAssembly = true;
+            Config.RejectMultiples = RejectionMethods::EnergyWindow;
+                // None        - multiples are allowed, the coincidence pair takes two strongest depositions
+                // All         - all coincidences with the multiplicities larger than two are discarded
+                // EnergyWndow - multiple coincidence is discarded only if there are more than two energy-accepted depositions
 
-        //Rejection config
         Config.RejectSameHead    = true;
-        Config.RejectMultiples   = Configuration::EnergyWindow; // only for FinderMethod=2  possible choices:  None, All, EnergyWindow
-
         Config.CoincidenceWindow = 4.0;      // [ns]
 
         Config.TimeFrom          = 0;
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     std::vector<EventRecord>     Events;
     std::vector<CoincidencePair> Pairs;
 
-    const bool EnforceEnergyInReader = (Config.FinderMethod == 1);
+    const bool EnforceEnergyInReader = (Config.FinderMethod == FinderMethods::Basic);
     Reader reader(EnforceEnergyInReader);
     std::string error = reader.read(Events);
     if (!error.empty())
@@ -110,13 +110,13 @@ int main(int argc, char** argv)
     out("-->Finding coincidences");
     switch (Config.FinderMethod)
     {
-    case 1:
+    case FinderMethods::Basic :
         {
             Finder1 cf(Events, LUT);
             cf.findCoincidences(Pairs);
         }
         break;
-    case 2:
+    case FinderMethods::Advanced :
         {
             Finder2 cf(Events, LUT);
             cf.findCoincidences(Pairs);

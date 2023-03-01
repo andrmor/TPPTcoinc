@@ -1,6 +1,8 @@
 #ifndef configuration_h
 #define configuration_h
 
+#include "Enums.hh"
+
 #include <string>
 #include <vector>
 
@@ -34,17 +36,12 @@ public:
     std::string LutFileName        = "LUT.txt";
     std::string ExportLutFileName  = "CrystalLUT.txt";
 
-    int    FinderMethod      = 2;
+    FinderMethods FinderMethod = FinderMethods::Basic;
 
     bool   GroupByAssembly   = true;
+    RejectionMethods RejectMultiples = RejectionMethods::None;
 
     bool   RejectSameHead    = true;
-
-    enum EMultiRejection {None, All, EnergyWindow}; // None        - multiples are allowed, the coincidence pair takes two strongest depositions
-                                                    // All         - all coincidences with the multiplicities larger than two are discarded
-                                                    // EnergyWndow - multiple coincidence is discarded only if there are more than two energy-accepted depositions
-    EMultiRejection RejectMultiples = None;
-
     double CoincidenceWindow = 4.0; // [ns]
 
     // consider events only in this time range [ns]

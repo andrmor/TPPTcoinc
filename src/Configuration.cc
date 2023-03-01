@@ -29,12 +29,30 @@ void Configuration::saveConfig(const std::string & fileName) const
     json["LutFileName"]       = LutFileName;
     json["ExportLutFileName"] = ExportLutFileName;
 
-    json["FinderMethod"]      = FinderMethod;
+    std::string str;
+    switch (FinderMethod)
+    {
+    case FinderMethods::Basic    : str = "Basic";    break;
+    case FinderMethods::Advanced : str = "Advanced"; break;
+    default :
+        out("Not impemented finder method!");
+        exit(130);
+    }
+    json["FinderMethod"] = str;
 
     json["GroupByAssembly"]   = GroupByAssembly;
-
     json["RejectSameHead"]    = RejectSameHead;
-    json["RejectMultiples"]   = static_cast<int>(RejectMultiples);
+
+    switch (RejectMultiples)
+    {
+    case RejectionMethods::None         : str = "None";         break;
+    case RejectionMethods::All          : str = "All";          break;
+    case RejectionMethods::EnergyWindow : str = "EnergyWindow"; break;
+    default :
+        out("Not impemented multiple rejection method!");
+        exit(131);
+    }
+    json["RejectMultiples"] = str;
 
     json["CoincidenceWindow"] = CoincidenceWindow;
 
@@ -94,20 +112,27 @@ void Configuration::loadConfig(const std::string & fileName)
     jstools::readString(json, "LutFileName",       LutFileName);
     jstools::readString(json, "ExportLutFileName", ExportLutFileName);
 
-    jstools::readInt   (json, "FinderMethod",      FinderMethod);
-
-    jstools::readBool  (json, "GroupByAssembly",   GroupByAssembly);
-
-    jstools::readBool  (json, "RejectSameHead",    RejectSameHead);
-    int iTmp = 666;
-    jstools::readInt  (json, "RejectMultiples",   iTmp);
-    switch (iTmp)
+    std::string str;
+    jstools::readString(json, "FinderMethod", str);
+    if      (str == "Basic")    FinderMethod = FinderMethods::Basic;
+    else if (str == "Advanced") FinderMethod = FinderMethods::Advanced;
+    else
     {
-    case 0: RejectMultiples = None;          break;
-    case 1: RejectMultiples = All;           break;
-    case 2: RejectMultiples = EnergyWindow;  break;
-    default:
-        out("Unknown multiple rejection mode!");
+        out("Unknown finder method:", str);
+        exit(13);
+    }
+
+    jstools::readBool(json, "GroupByAssembly",   GroupByAssembly);
+
+    jstools::readBool(json, "RejectSameHead",    RejectSameHead);
+
+    jstools::readString(json, "RejectMultiples", str);
+    if      (str == "None")          RejectMultiples = RejectionMethods::None;
+    else if (str == "All")           RejectMultiples = RejectionMethods::All;
+    else if (str == "EnergyWindow")  RejectMultiples = RejectionMethods::EnergyWindow;
+    else
+    {
+        out("Unknown multiple rejection method:", str);
         exit(13);
     }
 
