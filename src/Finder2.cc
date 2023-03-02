@@ -92,7 +92,7 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
         if (EventsWithin.size() > 2)
         {
             numMultiThree511OrMore++;
-            if (Config.RejectMultiples == RejectionMethods::EnergyWindow)
+            if (Config.RejectMultiples != RejectionMethods::None)  // EnergyWindow and All options (there cood be two events  but outside energy ramnge, so "All" has to be here)
             {
                 iCurrentEvent = iNextEvent;
                 continue;

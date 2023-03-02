@@ -25,7 +25,7 @@ private:
     Hist1D * histScintMulti    = nullptr;
     Hist1D * histAssemblyMulti = nullptr;
 
-    void groupEventsByAssembly(std::vector<EventRecord> & EventsWithin);
+    void groupEventsByAssembly(std::vector<EventRecord> & EventsWithin); // !!!*** can be improved: problem if (2, 1,1,1) -> merge (2,3) --> index is wrong?
     void killOutsideEnergyWinow(std::vector<EventRecord> & EventsWithin);
     bool isOutsideEnergyWindow(double energy) const;
     void mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord);
