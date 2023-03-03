@@ -99,10 +99,8 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
             }
         }
 
-        // could be more than two events, sorting them by energy (largest will be first)
-        std::sort(EventsWithin.begin(), EventsWithin.end(),
-                  [](const EventRecord & r1, const EventRecord & r2)
-                  { return r1.Energy > r2.Energy; });
+        // could be more than two events, sorting them by energy (largest will be first) -- already sorted if GroupByAssembly is true
+        std::sort(EventsWithin.begin(), EventsWithin.end(), [](const EventRecord & r1, const EventRecord & r2){ return (r1.Energy > r2.Energy); });
         //for (auto & r : EventsWithin) r.print();
 
         if (Config.RejectSameHead)
@@ -142,6 +140,11 @@ void Finder2::findCoincidences(std::vector<CoincidencePair> & Pairs)
 
 void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
 {
+    //out("->"); for (auto & r : EventsWithin) r.print(); out("<-");
+    std::sort(EventsWithin.begin(), EventsWithin.end(), [](const EventRecord & lhs, const EventRecord & rhs){return (lhs.Energy > rhs.Energy);});
+    // order of records: descreasing energy
+    //out("=>"); for (auto & r : EventsWithin) r.print(); out("<=");
+
     for (int iThis = (int)EventsWithin.size()-1; iThis > 0; iThis--)
     {
         const EventRecord & ThisRecord = EventsWithin[iThis];
@@ -153,7 +156,7 @@ void Finder2::groupEventsByAssembly(std::vector<EventRecord> & EventsWithin)
             EventRecord & TestRecord = EventsWithin[iTester];
             if ( thisAssembly != LUT.getAssemblyIndex(TestRecord.iScint) ) continue;
 
-            mergeFirstToSecondRecord(ThisRecord, TestRecord);
+            mergeFirstToSecondRecord(ThisRecord, TestRecord); // TestRecord has larger energy due to the sorting, so iScint is preserved by the merge
             bMerged = true;
             break;
         }
@@ -178,8 +181,11 @@ bool Finder2::isOutsideEnergyWindow(double energy) const
 
 void Finder2::mergeFirstToSecondRecord(const EventRecord & fromRecord, EventRecord & toRecord)
 {
-    toRecord.Time = std::min(fromRecord.Time, toRecord.Time);                     // !!!*** is it the best possible option?
-    toRecord.iScint = (toRecord.Energy > fromRecord.Energy ? toRecord.iScint      // scint with max energy
-                                                           : fromRecord.iScint);
+    toRecord.Time = std::min(fromRecord.Time, toRecord.Time);
+
+    // bad way: toRecord.iScint = (toRecord.Energy > fromRecord.Energy ? toRecord.iScint : fromRecord.iScint); // scint with max energy --> should not use due to possibility of multiple merges
+    // maintaining the toRecord iScint - they will be sorted by energy, and accessed from the end of the list
+    // this way the toRecord will always contain event with larger energy
+
     toRecord.Energy += fromRecord.Energy;
 }

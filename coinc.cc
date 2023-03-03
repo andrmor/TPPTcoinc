@@ -56,13 +56,13 @@ int main(int argc, char** argv)
         Config.WorkingDirectory  = "/home/andr/WORK/tmp";
 
         // input
-        //Config.InputFileName     = "BuilderOutput1e6.bin"; Config.BinaryInput  = true;
-        Config.InputFileName     = "BuilderOutput2e8.txt"; Config.BinaryInput = false;
+        Config.InputFileName     = "BuilderOutput.bin"; Config.BinaryInput  = true;
+        //Config.InputFileName     = "BuilderOutput.txt"; Config.BinaryInput = false;
         Config.LutFileName       = "LUT.txt";
 
         // output
         //Config.OutputFileName    = "CoincPairs.bin"; Config.BinaryOutput = true;
-        Config.OutputFileName    = "CoincPairsLineY2e8.txt"; Config.BinaryOutput = false;
+        Config.OutputFileName    = "CoincPairs.txt"; Config.BinaryOutput = false;
         Config.HeaderFileName    = "Header.hlm";
         Config.ExportLutFileName = "CrystalLUT.txt";
 
@@ -81,11 +81,11 @@ int main(int argc, char** argv)
         Config.RejectSameHead    = true;
         Config.CoincidenceWindow = 4.0;      // [ns]
 
-        Config.TimeFrom          = 0;
-        Config.TimeTo            = 1e50;
-
         Config.EnergyFrom        = 0.511 * 0.95; // [MeV]
         Config.EnergyTo          = 0.511 * 1.05;
+
+        Config.TimeFrom          = 0;  // [ns]
+        Config.TimeTo            = 1e50;
 
         // --- End of user inits
     }
